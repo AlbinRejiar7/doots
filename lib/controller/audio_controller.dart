@@ -1,6 +1,3 @@
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-import 'package:doots/constants/color_constants.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,18 +11,10 @@ class AudioController extends GetxController {
   var isPlaying = false.obs;
   var player = AudioPlayer();
   var progressIndex = RxInt(0);
+  var isMicrophoneGranted = false.obs;
 
-  void togglePlayPause(var path, var index) {
-    if (isPlaying.value) {
-      player.pause();
-    } else {
-      if (player.playing) {
-        player.seek(Duration.zero); // Restart if already completed
-      }
-      playAudio(path, index);
-    }
-
-    isPlaying(!isPlaying.value);
+  void micPermission(bool value) {
+    isMicrophoneGranted(value);
   }
 
   Future<void> startRecording() async {
@@ -33,7 +22,7 @@ class AudioController extends GetxController {
       if (await audioRecorder.hasPermission()) {
         final directory = await getApplicationDocumentsDirectory();
         await audioRecorder.start(const RecordConfig(),
-            path: '${directory.path}/myFile${const Uuid().v4()}.m4a');
+            path: '${directory.path}/${Uuid().v4()}myFile.m4a');
 
         isRecording(true);
       }
@@ -52,7 +41,6 @@ class AudioController extends GetxController {
 
       progressIndex.value = currentPlayingIndex;
     } catch (e) {
-      // Handle any errors
       print("Error playing audio: ${e.toString()}");
     }
   }
@@ -66,29 +54,6 @@ class AudioController extends GetxController {
     } catch (e) {
       print('${e}errorrrrrrrrrr');
     }
-  }
-
-  Widget progressbar(
-    int index,
-    Duration? duration,
-  ) {
-    return StreamBuilder<Duration?>(
-        stream: player.positionStream,
-        builder: (ctx, snapshot) {
-          return Obx(() {
-            return ProgressBar(
-                progressBarColor: kgreen1,
-                thumbColor: kGreen,
-                onSeek: (duration) {
-                  player.seek(duration);
-                },
-                buffered: player.bufferedPosition,
-                progress: progressIndex.value == index
-                    ? snapshot.data ?? Duration.zero
-                    : Duration.zero,
-                total: duration ?? Duration.zero);
-          });
-        });
   }
 
   @override

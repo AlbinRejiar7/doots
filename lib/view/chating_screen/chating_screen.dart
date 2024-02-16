@@ -2,6 +2,7 @@
 
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/audio_controller.dart';
+import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/view/chating_screen/user_details_screen.dart';
 import 'package:doots/widgets/custom_attachement_card.dart';
@@ -12,20 +13,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:voice_message_package/voice_message_package.dart';
 
 enum MessageType {
   text,
   audio,
+  document,
 }
 
-class ChattingScreen extends StatefulWidget {
+class ChattingScreen extends StatelessWidget {
   const ChattingScreen({super.key});
 
-  @override
-  State<ChattingScreen> createState() => _ChattingScreenState();
-}
-
-class _ChattingScreenState extends State<ChattingScreen> {
   @override
   Widget build(BuildContext context) {
     List<String> title = [
@@ -51,6 +50,7 @@ class _ChattingScreenState extends State<ChattingScreen> {
     var width = context.width;
     var c = Get.put(ChattingScreenController());
     var audioCtr = Get.put(AudioController());
+    var documentCtr = Get.put(DocumentController());
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -131,7 +131,7 @@ class _ChattingScreenState extends State<ChattingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Container(
-                                padding: EdgeInsets.all(12),
+                                padding: EdgeInsets.all(width * 0.02),
                                 decoration: BoxDecoration(
                                     color: kGreen.withOpacity(0.4),
                                     borderRadius: BorderRadius.circular(5)),
@@ -147,50 +147,31 @@ class _ChattingScreenState extends State<ChattingScreen> {
                             ],
                           ),
                         );
-                      } else {
-                        return Container(
-                          padding: EdgeInsets.all(8),
-                          alignment: Alignment.centerRight,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                height: height * 0.1,
-                                width: width * 0.6,
-                                decoration: BoxDecoration(
-                                    color: kGreen.withOpacity(0.4),
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: Center(
-                                  child: Row(
-                                    children: [
-                                      Obx(() {
-                                        return IconButton(
-                                          onPressed: () {
-                                            audioCtr.togglePlayPause(
-                                              chats[index]['chats'],
-                                              index,
-                                            );
-                                          },
-                                          icon: Icon(audioCtr.isPlaying.value
-                                              ? Icons.pause
-                                              : Icons.play_arrow),
-                                        );
-                                      }),
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.only(top: width * 0.06),
-                                        child: SizedBox(
-                                            width: width * 0.4,
-                                            child: audioCtr.progressbar(index,
-                                                chats[index]['duration'])),
-                                      ),
-                                    ],
-                                  ),
+                      } else if (chats[index]['type'] == MessageType.document) {
+                        return chats[index]['chats'] != null
+                            ? GestureDetector(
+                                onTap: () {
+                                  documentCtr.openFile(chats[index]['chats']);
+                                },
+                                child: Text(
+                                  'Selected File: mala, Type: pdf}',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.blue),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
+                              )
+                            : SizedBox.shrink();
+                      } else {
+                        return Obx(() {
+                          return audioCtr.isMicrophoneGranted.value
+                              ? Container(
+                                  padding: EdgeInsets.all(width * 0.02),
+                                  alignment: Alignment.centerRight,
+                                  child: VoiceMessage(
+                                      played: false,
+                                      audioSrc: chats[index]["chats"],
+                                      me: true))
+                              : SizedBox();
+                        });
                       }
                     },
                   ),
@@ -229,6 +210,7 @@ class _ChattingScreenState extends State<ChattingScreen> {
                                     itemBuilder:
                                         (BuildContext context, int index) {
                                       return CustomAttachement(
+                                          index: index,
                                           color: kgreen1.withOpacity(0.2),
                                           title: title[index],
                                           icon: myIcons[index]);
@@ -308,7 +290,18 @@ class _ChattingScreenState extends State<ChattingScreen> {
                                       : GestureDetector(
                                           onLongPress: () async {
                                             print("pressing..........");
-                                            audioCtr.startRecording();
+
+                                            if (await Permission
+                                                .microphone.isGranted) {
+                                              audioCtr.micPermission(
+                                                  await Permission
+                                                      .microphone.isGranted);
+
+                                              audioCtr.startRecording();
+                                            } else {
+                                              await Permission.microphone
+                                                  .request();
+                                            }
                                           },
                                           onLongPressEnd: (details) async {
                                             print("ended........");

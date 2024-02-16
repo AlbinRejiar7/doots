@@ -1,4 +1,5 @@
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,26 +8,31 @@ class CustomAttachement extends StatelessWidget {
   final String title;
   final IconData icon;
   final Color color;
-  final void Function()? onPressed;
+  final int index;
 
   const CustomAttachement({
     super.key,
     required this.title,
     required this.icon,
     required this.color,
-    this.onPressed,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
     var height = context.height;
+    var documentCtr = Get.put(DocumentController());
 
     return Column(
       children: [
         CircleAvatar(
             backgroundColor: color,
             child: IconButton(
-              onPressed: onPressed,
+              onPressed: () async {
+                if (index == 0) {
+                  await documentCtr.pickDocument();
+                }
+              },
               icon: Icon(
                 icon,
                 color: kgreen1,

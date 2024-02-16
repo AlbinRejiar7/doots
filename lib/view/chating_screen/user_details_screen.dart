@@ -120,7 +120,7 @@ class DetailsScreen extends StatelessWidget {
                 itemCount: title.length,
                 itemBuilder: (BuildContext context, int index) {
                   return CustomAttachement(
-                      onPressed: () {},
+                      index: index,
                       color: Theme.of(context).primaryColor,
                       title: title[index],
                       icon: myIcons[index]);

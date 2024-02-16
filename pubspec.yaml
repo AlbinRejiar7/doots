@@ -38,7 +38,7 @@ dependencies:
   get: ^4.6.6
   google_fonts: ^6.1.0
   get_storage: ^2.1.1
-  intl: ^0.19.0
+  intl: ^0.18.0
   emoji_picker_flutter: ^1.5.1
   path_provider: ^2.1.2
   permission_handler: ^11.3.0
@@ -47,6 +47,15 @@ dependencies:
   audio_video_progress_bar: ^2.0.1
   uuid: ^3.0.1
   flutter_sound: ^9.2.13
+  voice_message_package:
+#    path: ../voice_message_player-code-with-bisky
+    git:
+      url: https://github.com/codewithbisky/voice_message_player.git
+      ref: master
+  file_picker: ^6.1.1
+  url_launcher: ^6.2.4
+  open_filex: ^4.4.0
+
 
 
 

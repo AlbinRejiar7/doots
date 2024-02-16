@@ -12,19 +12,30 @@ class ChattingScreenController extends GetxController {
 
   TextEditingController chatCtr = TextEditingController();
   TextEditingController emojiCtr = TextEditingController();
-  RxList chats = RxList([]);
-  RxList voicechats = RxList([]);
-  var audioC = Get.put(AudioController());
-  void addchat(
-    String chat,
-    MessageType type,
-  ) async {
+  var chats = RxList([]);
+
+  late AudioController audioC;
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    audioC = Get.put(AudioController());
+  }
+
+  void addchat(String chat, MessageType type,
+      {String? fileName, String? extension}) async {
     if (type == MessageType.audio) {
-      var totalDuration = await audioC.player.setFilePath(
-        chat,
-      );
-      audioC.player.stop();
-      chats.add({"chats": chat, "type": type, "duration": totalDuration});
+      chats.add({
+        "chats": chat,
+        "type": type,
+      });
+    } else if (type == MessageType.document) {
+      chats.add({
+        "chats": chat,
+        "type": type,
+        "fileName": fileName ?? 'null',
+        "extension": extension ?? ''
+      });
     } else {
       chats.add({
         "chats": chat,
