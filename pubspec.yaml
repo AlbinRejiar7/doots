@@ -43,18 +43,24 @@ dependencies:
   path_provider: ^2.1.2
   permission_handler: ^11.3.0
   record: ^5.0.4
-  just_audio: ^0.9.36
-  audio_video_progress_bar: ^2.0.1
   uuid: ^3.0.1
-  flutter_sound: ^9.2.13
   voice_message_package:
 #    path: ../voice_message_player-code-with-bisky
     git:
       url: https://github.com/codewithbisky/voice_message_player.git
       ref: master
   file_picker: ^6.1.1
-  url_launcher: ^6.2.4
   open_filex: ^4.4.0
+  image_picker: ^1.0.7
+  photo_view: ^0.14.0
+  chewie: ^1.7.5
+  video_player:
+  video_thumbnail: ^0.5.3
+  flutter_map: ^6.1.0
+  location: ^5.0.3
+  flutter_map_location_marker: ^8.0.7
+  geolocator: ^11.0.0
+  latlong2: ^0.9.0
 
 
 

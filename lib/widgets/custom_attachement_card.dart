@@ -1,5 +1,8 @@
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/controller/bottom_sheet_controller/camera_controller.dart';
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
+import 'package:doots/controller/bottom_sheet_controller/gallery_controller.dart';
+import 'package:doots/controller/bottom_sheet_controller/location_controller.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,6 +25,8 @@ class CustomAttachement extends StatelessWidget {
   Widget build(BuildContext context) {
     var height = context.height;
     var documentCtr = Get.put(DocumentController());
+    var galleryCtr = Get.put(GallaryController());
+    var locationCtr = Get.put(LocationController());
 
     return Column(
       children: [
@@ -31,6 +36,15 @@ class CustomAttachement extends StatelessWidget {
               onPressed: () async {
                 if (index == 0) {
                   await documentCtr.pickDocument();
+                }
+                if (index == 1) {
+                  await CameraController().takePhoto();
+                }
+                if (index == 2) {
+                  await galleryCtr.openImagePicker();
+                }
+                if (index == 4) {
+                  await locationCtr.getCurrentLocation();
                 }
               },
               icon: Icon(

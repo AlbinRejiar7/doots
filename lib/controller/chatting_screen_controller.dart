@@ -1,7 +1,9 @@
 import 'package:doots/controller/audio_controller.dart';
-import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
+
+import 'bottom_sheet_controller/icons.dart';
 
 class ChattingScreenController extends GetxController {
   final FocusNode focusNode = FocusNode();
@@ -17,29 +19,50 @@ class ChattingScreenController extends GetxController {
   late AudioController audioC;
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     audioC = Get.put(AudioController());
   }
 
-  void addchat(String chat, MessageType type,
-      {String? fileName, String? extension}) async {
-    if (type == MessageType.audio) {
+  void addchat(var chat, MessageType messageType,
+      {String? fileName,
+      String? extension,
+      String? size,
+      String? thumbnail}) async {
+    if (messageType == MessageType.audio) {
       chats.add({
         "chats": chat,
-        "type": type,
+        "type": messageType,
       });
-    } else if (type == MessageType.document) {
+    } else if (messageType == MessageType.document) {
       chats.add({
         "chats": chat,
-        "type": type,
-        "fileName": fileName ?? 'null',
-        "extension": extension ?? ''
+        "type": messageType,
+        "fileName": fileName ?? '',
+        "extension": extension ?? '',
+        "size": size ?? " ",
+      });
+    } else if (messageType == MessageType.photos) {
+      chats.add({
+        "chats": chat,
+        "type": messageType,
+        "size": size ?? " ",
+        "id": Uuid().v4(),
+      });
+    } else if (messageType == MessageType.videos) {
+      var Thumbnails = [thumbnail];
+      List reVThumbnail = [];
+      reVThumbnail.addAll(Thumbnails.reversed);
+
+      chats.add({
+        "chats": chat,
+        "type": messageType,
+        "size": size ?? " ",
+        "thumbnail": reVThumbnail
       });
     } else {
       chats.add({
         "chats": chat,
-        "type": type,
+        "type": messageType,
       });
     }
   }

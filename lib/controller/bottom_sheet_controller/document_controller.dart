@@ -1,9 +1,8 @@
+import 'package:doots/controller/bottom_sheet_controller/icons.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
-import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DocumentController extends GetxController {
   Rx<PlatformFile?> selectedFile = Rx<PlatformFile?>(null);
@@ -16,9 +15,16 @@ class DocumentController extends GetxController {
 
     if (result != null) {
       selectedFile(result.files.single);
+
+      String fileName = selectedFile.value!.name;
+      String? exe = selectedFile.value!.extension;
+      double? size = selectedFile.value!.size / 1000000;
       c.addchat(
         selectedFile.value!.path ?? "",
         MessageType.document,
+        fileName: fileName,
+        extension: exe,
+        size: size.toStringAsFixed(1),
       );
       Get.back();
     } else {
@@ -29,20 +35,8 @@ class DocumentController extends GetxController {
   Future<void> openFile(String? filePath) async {
     if (filePath != null) {
       await OpenFilex.open(filePath);
-    }
-  }
-
-  Future<void> openDocument(String? filePath) async {
-    if (filePath != null) {
-      final Uri uri = Uri.file(filePath);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        // Handle errors
-        print('Could not launch $filePath');
-      }
     } else {
-      print('File path is null');
+      Get.snackbar("Invalid", "invalid file");
     }
   }
 }
