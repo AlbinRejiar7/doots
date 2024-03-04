@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 class ColorPicker extends StatelessWidget {
   var colorController = Get.put(SettingsController());
 
+  ColorPicker({super.key});
+
   @override
   Widget build(BuildContext context) {
     var width = context.width;
@@ -37,7 +39,7 @@ class ColorPicker extends StatelessWidget {
           radius: 16,
           backgroundColor: color,
           child: colorController.selectedColor.value == color
-              ? Icon(
+              ? const Icon(
                   Icons.check,
                   color: Colors.white,
                 )

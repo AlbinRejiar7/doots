@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_nullable_for_final_variable_declarations
-
 import 'dart:io';
 
 import 'package:doots/controller/bottom_sheet_controller/icons.dart';
@@ -20,33 +18,28 @@ class GallaryController extends GetxController {
     List<String> photoExtensions = ['jpg', 'jpeg', 'png'];
     List<String> videoExtensions = ['mp4', 'mov'];
     var picker = ImagePicker();
-    final List<XFile>? medias = await picker.pickMultipleMedia();
-    if (medias != null) {
-      List<String> photosAndVideos = [];
-      List<String> thumbnails = [];
-      photosAndVideos = medias.map<String>((xfile) => xfile.path).toList();
+    final List<XFile> medias = await picker.pickMultipleMedia();
+    List<String> photosAndVideos = [];
+    List<String> thumbnails = [];
+    photosAndVideos = medias.map<String>((xfile) => xfile.path).toList();
 
-      for (String filePath in photosAndVideos) {
-        String extension = filePath.split('.').last.toLowerCase();
+    for (String filePath in photosAndVideos) {
+      String extension = filePath.split('.').last.toLowerCase();
 
-        if (photoExtensions.contains(extension)) {
-          photoPaths.add(File(filePath));
-          c.addchat(photoPaths, MessageType.photos);
-        } else if (videoExtensions.contains(extension)) {
-          videoPaths.add(File(filePath));
-          var thumbnail = await VideoThumbnail.thumbnailFile(
-            video: filePath,
-            thumbnailPath: (await getTemporaryDirectory()).path,
-            imageFormat: ImageFormat.PNG,
-          );
-          thumbnails.add(thumbnail!);
-          print("this is my thumbnails ${thumbnails}");
+      if (photoExtensions.contains(extension)) {
+        photoPaths.add(File(filePath));
+        c.addchat(photoPaths, MessageType.photos);
+      } else if (videoExtensions.contains(extension)) {
+        videoPaths.add(File(filePath));
+        var thumbnail = await VideoThumbnail.thumbnailFile(
+          video: filePath,
+          thumbnailPath: (await getTemporaryDirectory()).path,
+          imageFormat: ImageFormat.PNG,
+        );
+        thumbnails.add(thumbnail!);
 
-          c.addchat(videoPaths, MessageType.videos, thumbnail: thumbnail);
-        }
+        c.addchat(videoPaths, MessageType.videos, thumbnail: thumbnail);
       }
-    } else {
-      Get.snackbar("Media", "Nothing selected");
     }
   }
 }

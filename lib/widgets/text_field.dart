@@ -1,3 +1,4 @@
+import 'package:doots/constants/color_constants.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -15,6 +16,8 @@ class CustomTextField extends StatelessWidget {
   final void Function(String)? onChanged;
   final void Function()? onTap;
   final TextStyle? style;
+  final Widget? prefix;
+  final bool isChattingScreen;
 
   CustomTextField({
     super.key,
@@ -32,6 +35,8 @@ class CustomTextField extends StatelessWidget {
     this.isMaxLine = false,
     this.onTap,
     this.style,
+    this.prefix,
+    this.isChattingScreen = false,
   });
 
   @override
@@ -46,6 +51,16 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       focusNode: focusNode,
       decoration: InputDecoration(
+          prefixIcon: prefix,
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: isChattingScreen
+                  ? BorderSide.none
+                  : BorderSide(color: kgreen1, width: 2)),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide:
+                  isChattingScreen ? BorderSide.none : BorderSide(width: 0.3)),
           hintStyle: Theme.of(context).textTheme.bodyLarge,
           fillColor: fillColor,
           filled: filled,
@@ -56,11 +71,9 @@ class CustomTextField extends StatelessWidget {
           isDense: true,
           border: isBoarder
               ? OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: Theme.of(context).colorScheme.primary),
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(100),
                 )
-              : OutlineInputBorder(borderSide: BorderSide.none)),
+              : const OutlineInputBorder(borderSide: BorderSide.none)),
     );
   }
 }

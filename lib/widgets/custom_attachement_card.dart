@@ -1,4 +1,5 @@
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/controller/bottom_sheet_controller/audio_controller.dart';
 import 'package:doots/controller/bottom_sheet_controller/camera_controller.dart';
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/controller/bottom_sheet_controller/gallery_controller.dart';
@@ -12,6 +13,7 @@ class CustomAttachement extends StatelessWidget {
   final IconData icon;
   final Color color;
   final int index;
+  final bool? isDetailScreen;
 
   const CustomAttachement({
     super.key,
@@ -19,6 +21,7 @@ class CustomAttachement extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.index,
+    this.isDetailScreen = false,
   });
 
   @override
@@ -27,6 +30,7 @@ class CustomAttachement extends StatelessWidget {
     var documentCtr = Get.put(DocumentController());
     var galleryCtr = Get.put(GallaryController());
     var locationCtr = Get.put(LocationController());
+    var audioCtr = AudioFileController();
 
     return Column(
       children: [
@@ -34,17 +38,23 @@ class CustomAttachement extends StatelessWidget {
             backgroundColor: color,
             child: IconButton(
               onPressed: () async {
-                if (index == 0) {
+                if (index == 0 && isDetailScreen == false) {
                   await documentCtr.pickDocument();
                 }
-                if (index == 1) {
+                if (index == 1 && isDetailScreen == false) {
                   await CameraController().takePhoto();
                 }
-                if (index == 2) {
+                if (index == 2 && isDetailScreen == false) {
                   await galleryCtr.openImagePicker();
                 }
-                if (index == 4) {
+                if (index == 3 && isDetailScreen == false) {
+                  await audioCtr.pickAudio();
+                }
+                if (index == 4 && isDetailScreen == false) {
                   await locationCtr.getCurrentLocation();
+                }
+                if (index == 6 && isDetailScreen == false) {
+                  // await galleryCtr.pickVideo();
                 }
               },
               icon: Icon(

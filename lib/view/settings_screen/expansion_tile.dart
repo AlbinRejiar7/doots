@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/view/settings_screen/color_picker.dart';
 import 'package:doots/view/settings_screen/dropdown.dart';

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+import 'dart:developer';
 
 import 'package:doots/controller/contact_screen_controller.dart';
 import 'package:doots/view/chating_screen/chating_screen.dart';
@@ -9,8 +9,6 @@ import 'package:doots/widgets/text_field.dart';
 import 'package:doots/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../constants/color_constants.dart';
 
 class ContactsScreen extends StatelessWidget {
   const ContactsScreen({super.key});
@@ -25,9 +23,8 @@ class ContactsScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: width * 0.03,
-          ),
+          padding:
+              EdgeInsets.fromLTRB(width * 0.03, width * 0.04, width * 0.03, 0),
           child: Column(
             children: [
               Row(
@@ -40,7 +37,8 @@ class ContactsScreen extends StatelessWidget {
                   plusCardButton(
                     height,
                     () {
-                      Get.dialog(CreateContactWidget());
+                      Get.to(() => CreateContactPage(),
+                          transition: Transition.downToUp);
                     },
                   )
                 ],
@@ -51,7 +49,6 @@ class ContactsScreen extends StatelessWidget {
                   suffixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: Theme.of(context).primaryColor,
-                  isBoarder: false,
                   hintText: "Search Contacts.."),
               Expanded(
                 child: Obx(() {
@@ -61,19 +58,22 @@ class ContactsScreen extends StatelessWidget {
                       itemCount: c.foundedUsers.length,
                       itemBuilder: (context, index) {
                         c.contacts.sort((a, b) {
-                          return a.toLowerCase().compareTo(b.toLowerCase());
+                          return a['name']
+                              .toLowerCase()
+                              .compareTo(b['name'].toLowerCase());
                         });
                         if (index == 0 ||
-                            c.foundedUsers[index][0] !=
-                                c.foundedUsers[index - 1][0]) {
+                            c.foundedUsers[index]['name'][0] !=
+                                c.foundedUsers[index - 1]['name'][0]) {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
                                   CustomTextWidget(
-                                    text: c.foundedUsers[index][0],
-                                    color: kGreen,
+                                    text: c.foundedUsers[index]['name'][0],
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                   kWidth(width * 0.02),
                                   Expanded(
@@ -84,32 +84,44 @@ class ContactsScreen extends StatelessWidget {
                               ),
                               ListTile(
                                 onTap: () {
-                                  Get.to(() => ChattingScreen());
+                                  c.tappedIndex(index);
+                                  log(c.currentIndex.value.toString());
+                                  Get.to(
+                                    () => ChattingScreen(),
+                                  );
                                 },
-                                leading: CircleAvatar(),
-                                title: Text(c.foundedUsers[index]),
-                                trailing: IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      Icons.more_vert,
-                                      color: kGreen,
-                                    )),
+                                leading: CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                      "https://dpwalay.com/wp-content/uploads/2023/11/dazzling-girl-dp-for-whatsapp.jpg"),
+                                ),
+                                title: Text(c.foundedUsers[index]['name']),
+                                // trailing: IconButton(
+                                //     onPressed: () {},
+                                //     icon: Icon(
+                                //       Icons.more_vert,
+                                //       color: kGreen,
+                                //     )),
                               ),
                             ],
                           );
                         } else {
                           return ListTile(
                             onTap: () {
-                              Get.to(() => ChattingScreen());
+                              c.tappedIndex(index);
+                              Get.to(() => ChattingScreen(),
+                                  arguments: c.foundedUsers[index]['name']);
                             },
-                            leading: CircleAvatar(),
-                            title: Text(c.foundedUsers[index]),
-                            trailing: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.more_vert,
-                                  color: kGreen,
-                                )),
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                  "https://dpwalay.com/wp-content/uploads/2023/11/dazzling-girl-dp-for-whatsapp.jpg"),
+                            ),
+                            title: Text(c.foundedUsers[index]['name']),
+                            // trailing: IconButton(
+                            //     onPressed: () {},
+                            //     icon: Icon(
+                            //       Icons.more_vert,
+                            //       color: kGreen,
+                            //     )),
                           );
                         }
                       },

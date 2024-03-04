@@ -11,6 +11,10 @@ class ChattingScreenController extends GetxController {
   var emojiShowing = false.obs;
   var isEditing = false.obs;
   var isMic = true.obs;
+  var isContainerVisibile = false.obs;
+  void changeBottomSheet(bool value) {
+    isContainerVisibile(value);
+  }
 
   TextEditingController chatCtr = TextEditingController();
   TextEditingController emojiCtr = TextEditingController();
@@ -46,7 +50,7 @@ class ChattingScreenController extends GetxController {
         "chats": chat,
         "type": messageType,
         "size": size ?? " ",
-        "id": Uuid().v4(),
+        "id": const Uuid().v4(),
       });
     } else if (messageType == MessageType.videos) {
       var Thumbnails = [thumbnail];

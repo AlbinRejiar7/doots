@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
@@ -18,9 +17,6 @@ class PhotoViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var height = context.height;
-    var width = context.width;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -39,7 +35,7 @@ class PhotoViewer extends StatelessWidget {
           },
           itemCount: files.length,
           loadingBuilder: (context, event) => Center(
-            child: Container(
+            child: SizedBox(
               width: 20.0,
               height: 20.0,
               child: CircularProgressIndicator(value: event == null ? 0 : 10),

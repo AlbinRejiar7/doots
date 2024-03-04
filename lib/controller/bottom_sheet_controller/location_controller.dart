@@ -34,8 +34,7 @@ class LocationController extends GetxController {
       Position position = await determinePosition();
       c.addchat(position, MessageType.location);
     } catch (e) {
-      print('Error getting location: $e');
-      // Handle errors (e.g., display an error message)
+      Get.snackbar("error", e.toString());
     }
   }
 }

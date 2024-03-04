@@ -17,9 +17,12 @@ class CallsScreen extends StatelessWidget {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Calls',
-          style: Theme.of(context).textTheme.titleLarge,
+        title: Padding(
+          padding: EdgeInsets.fromLTRB(0, width * 0.04, width * 0.03, 0),
+          child: Text(
+            'Calls',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         automaticallyImplyLeading: false,
       ),
@@ -27,7 +30,10 @@ class CallsScreen extends StatelessWidget {
         itemCount: names.length,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
-            leading: CircleAvatar(),
+            leading: const CircleAvatar(
+              backgroundImage: NetworkImage(
+                  "https://i.pinimg.com/474x/98/51/1e/98511ee98a1930b8938e42caf0904d2d.jpg"),
+            ),
             title: Text(
               names[index],
               style: TextStyle(
@@ -41,9 +47,9 @@ class CallsScreen extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('0:12'),
+                const Text('0:12'),
                 kWidth(width * 0.03),
-                Icon(
+                const Icon(
                   Icons.call,
                   color: kgreen1,
                 )

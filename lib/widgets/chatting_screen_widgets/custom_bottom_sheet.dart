@@ -21,12 +21,13 @@ class CustomBottomSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(width * 0.05),
       height: height * 0.3,
+      width: width,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(9),
         color: Theme.of(context).scaffoldBackgroundColor,
       ),
       child: GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),

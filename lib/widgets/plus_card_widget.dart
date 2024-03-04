@@ -12,12 +12,12 @@ SizedBox plusCardButton(
       onTap: onTap,
       child: Card(
         elevation: 0,
-        color: kGreen.withOpacity(0.2),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-        child: Icon(
+        color: kGreen,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        child: const Icon(
           Icons.add,
           size: 14,
-          color: kGreen,
+          color: kWhite,
         ),
       ),
     ),

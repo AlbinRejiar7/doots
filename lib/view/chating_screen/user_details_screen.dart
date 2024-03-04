@@ -1,8 +1,7 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
-import 'package:doots/widgets/custom_attachement_card.dart';
+import 'package:doots/controller/contact_screen_controller.dart';
+import 'package:doots/view/chating_screen/audio_call_screen.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
 import 'package:flutter/material.dart';
@@ -17,24 +16,7 @@ class DetailsScreen extends StatelessWidget {
     var c = Get.put(ChattingScreenController());
     var height = context.height;
     var width = context.width;
-    List<String> title = [
-      'MESSAGE',
-      "FAVOURITE",
-      "AUDIO",
-      "VIDEO",
-      "ARCHIVE",
-      "MUTED",
-      "DELETE",
-    ];
-    List<IconData> myIcons = [
-      Icons.chat,
-      Icons.favorite_border,
-      Icons.call,
-      Icons.video_camera_back_rounded,
-      Icons.archive_rounded,
-      Icons.mic_off_outlined,
-      Icons.delete_outlined
-    ];
+
     String formattedDate = DateFormat('EEE d MMM').format(DateTime.now());
     String currentTime = DateFormat.jm().format(DateTime.now());
 
@@ -43,7 +25,7 @@ class DetailsScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         toolbarHeight: height * 0.2,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               image: DecorationImage(
                   fit: BoxFit.cover,
                   image: NetworkImage(
@@ -58,18 +40,11 @@ class DetailsScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  const Row(
                     children: [
                       BackButton(
                         color: kWhite,
                       ),
-                      IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.more_vert,
-                            color: kWhite,
-                          ))
                     ],
                   ),
                   Padding(
@@ -110,23 +85,40 @@ class DetailsScreen extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             kHeight(height * 0.015),
-            SizedBox(
-              height: height * 0.2,
-              child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                ),
-                itemCount: title.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return CustomAttachement(
-                      index: index,
-                      color: Theme.of(context).primaryColor,
-                      title: title[index],
-                      icon: myIcons[index]);
-                },
-              ),
-            ),
+            GetBuilder<ContactScreenController>(
+                init: ContactScreenController(),
+                builder: (contactCtr) {
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                    ),
+                    itemCount: contactCtr.title.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return CustomAttachement1(
+                          onPressed: () {
+                            if (index == 1) {
+                              contactCtr.updateIsFav();
+                            }
+                            if (index == 2) {
+                              Get.to(() => const AudioCallingScreen());
+                            }
+                          },
+                          index: index,
+                          color: Theme.of(context).primaryColor,
+                          title: contactCtr.title[index][0],
+                          icon: index == 1 &&
+                                  contactCtr
+                                      .foundedUsers[contactCtr
+                                          .currentIndex.value]['isFav']
+                                      .value
+                              ? Icons.favorite
+                              : contactCtr.title[index][1]);
+                    },
+                  );
+                }),
             kHeight(height * 0.015),
             Divider(
               color: Theme.of(context).primaryColor,
@@ -178,7 +170,7 @@ class DetailsScreen extends StatelessWidget {
                                 onPressed: () {
                                   c.changeEditingState();
                                 },
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.edit,
                                   color: kgreen1,
                                   size: 15,
@@ -203,11 +195,11 @@ class DetailsScreen extends StatelessWidget {
                               kWidth(width * 0.01),
                               ElevatedButton.icon(
                                   onPressed: () {},
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.save_alt,
                                     color: kgreen1,
                                   ),
-                                  label: Text(
+                                  label: const Text(
                                     "Save",
                                   ))
                             ],
@@ -216,7 +208,7 @@ class DetailsScreen extends StatelessWidget {
                       }),
                       kHeight(height * 0.01),
                       Text(
-                        "albin",
+                        "name",
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary),
@@ -251,7 +243,7 @@ class DetailsScreen extends StatelessWidget {
                           ),
                           TextButton(
                               onPressed: () {},
-                              child: Text(
+                              child: const Text(
                                 "Show all",
                                 style: TextStyle(color: kgreen1),
                               ))
@@ -274,6 +266,50 @@ class DetailsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class CustomAttachement1 extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final int index;
+  final void Function()? onPressed;
+  const CustomAttachement1({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.index,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    var height = context.height;
+
+    return Column(
+      children: [
+        CircleAvatar(
+            backgroundColor: color,
+            child: IconButton(
+              onPressed: onPressed,
+              icon: Icon(
+                icon,
+                color: kgreen1,
+                size: 17,
+              ),
+            )),
+        kHeight(height * 0.01),
+        FittedBox(
+          child: Text(
+            title,
+            style:
+                Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 11),
+          ),
+        )
+      ],
     );
   }
 }

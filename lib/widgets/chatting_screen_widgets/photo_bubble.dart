@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/widgets/photo_view.dart';
 import 'package:flutter/material.dart';
@@ -7,16 +9,18 @@ import 'package:intl/intl.dart';
 class PhotoBubble extends StatelessWidget {
   const PhotoBubble({
     super.key,
-    required this.chats,
     required this.height,
     required this.width,
+    required this.image,
     required this.index,
+    required this.chats,
   });
 
-  final List chats;
+  final List<File> chats;
   final double height;
   final double width;
   final int index;
+  final image;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,7 +31,7 @@ class PhotoBubble extends StatelessWidget {
               () => PhotoViewer(
                 initialIndex: index,
                 tag: 'hero-tag-$index',
-                files: chats[index]['chats'],
+                files: chats,
               ),
             );
           },
@@ -45,8 +49,7 @@ class PhotoBubble extends StatelessWidget {
                           color: kgreen1.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(7),
                           image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: FileImage(chats[index]['chats'][index]))),
+                              fit: BoxFit.cover, image: FileImage(image))),
                     )),
               ),
               Text(DateFormat.jm().format(DateTime.now()),

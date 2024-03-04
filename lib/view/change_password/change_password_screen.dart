@@ -1,6 +1,3 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
-import 'package:doots/constants/color_constants.dart';
 import 'package:doots/widgets/custom_auth_button.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
@@ -18,7 +15,6 @@ class ChangePasswordScreen extends StatelessWidget {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: kgreen1,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Center(
@@ -26,7 +22,6 @@ class ChangePasswordScreen extends StatelessWidget {
               padding: EdgeInsets.only(
                 left: width * 0.06,
                 right: width * 0.06,
-                top: height * 0.06,
               ),
               margin: EdgeInsets.only(
                   left: width * 0.05,
@@ -49,7 +44,9 @@ class ChangePasswordScreen extends StatelessWidget {
                   kHeight(height * 0.05),
                   Column(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
+                        backgroundImage: NetworkImage(
+                            "https://i.pinimg.com/474x/98/51/1e/98511ee98a1930b8938e42caf0904d2d.jpg"),
                         radius: 50,
                       ),
                       Text(
@@ -94,7 +91,7 @@ class ChangePasswordScreen extends StatelessWidget {
                       CustomTextField(
                         obscureText: true,
                         hintText: "Enter Confirm Password",
-                        suffixIcon: Icon(Icons.visibility_off),
+                        suffixIcon: const Icon(Icons.visibility_off),
                       )
                     ],
                   ),
@@ -113,7 +110,9 @@ class ChangePasswordScreen extends StatelessWidget {
                           textColor: Theme.of(context).colorScheme.primary,
                           color: Theme.of(context).primaryColor,
                           title: 'cancel',
-                          onTap: () {},
+                          onTap: () {
+                            Get.back();
+                          },
                         ),
                       ),
                     ],

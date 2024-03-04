@@ -17,7 +17,7 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(left: width * 0.35),
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       alignment: Alignment.centerRight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,

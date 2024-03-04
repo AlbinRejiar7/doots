@@ -14,14 +14,14 @@ class EmojiWidget extends StatelessWidget {
     var height = context.height;
     return Obx(() {
       return AnimatedContainer(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         height: c.emojiShowing.value ? height * 0.35 : 0,
         child: EmojiPicker(
           onEmojiSelected: (category, emoji) {
             c.changeMicState(false);
           },
           textEditingController: c.chatCtr,
-          config: Config(
+          config: const Config(
             checkPlatformCompatibility: true,
           ),
         ),

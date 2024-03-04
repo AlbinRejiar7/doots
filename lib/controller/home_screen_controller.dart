@@ -11,18 +11,17 @@ class HomeScreenController extends GetxController {
   final data = GetStorage();
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     isdarkmode(data.read('theme'));
   }
 
   List bottomPages = [
-    ChatsScreen(),
-    ContactsScreen(),
-    CallsScreen(),
-    SizedBox(),
-    ProfileScreen(),
-    SettingScreen(),
+    const ChatsScreen(),
+    const ContactsScreen(),
+    const CallsScreen(),
+    const SizedBox(),
+    const ProfileScreen(),
+    const SettingScreen(),
   ];
   var currentIndex = 0.obs;
   var isdarkmode = false.obs;

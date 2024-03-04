@@ -20,7 +20,7 @@ class MyDropdownButton extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             child: DropdownButton<String>(
-              underline: SizedBox(),
+              underline: const SizedBox(),
               value: controller.selectedValue.value,
               onChanged: (String? newValue) {
                 controller.selectedValue.value = newValue!;

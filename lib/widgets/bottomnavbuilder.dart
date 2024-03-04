@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/home_screen_controller.dart';
 import 'package:doots/view/change_password/change_password_screen.dart';
@@ -24,22 +22,13 @@ class CustomBottomNavigationBar extends StatelessWidget {
     return Container(
       height: height * 0.08,
       width: width,
-      color: kDarkModeBlack,
+      color: Theme.of(context).colorScheme.onPrimary,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(
-            0,
-            'assets/images/icons/chatsicon.png',
-          ),
-          _buildNavItem(
-            1,
-            'assets/images/icons/contacts.png',
-          ),
-          _buildNavItem(
-            2,
-            'assets/images/icons/callicon.png',
-          ),
+          _buildNavItem(0, 'assets/images/icons/chatsicon.png', context),
+          _buildNavItem(1, 'assets/images/icons/contacts.png', context),
+          _buildNavItem(2, 'assets/images/icons/callicon.png', context),
           Obx(() {
             return InkWell(
               onTap: () {
@@ -170,14 +159,17 @@ class CustomBottomNavigationBar extends StatelessWidget {
                     ],
                   )),
             ],
-            child: CircleAvatar(),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(
+                  'https://officesnapshots.com/wp-content/uploads/2023/05/dp-world-offices-london-16-700x467-compact.jpg'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(int index, var image) {
+  Widget _buildNavItem(int index, var image, BuildContext context) {
     return GestureDetector(
       onTap: () => onTap(index),
       child: Stack(
@@ -188,7 +180,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
               Image.asset(
                 image,
                 color: index == currentIndex
-                    ? kLightGreen.withGreen(255)
+                    ? Theme.of(context).colorScheme.onSecondary
                     : Colors.grey,
                 scale: 1.1,
               ),
@@ -202,7 +194,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
               child: Container(
                 height: 4,
                 decoration: BoxDecoration(
-                  color: kLightGreen.withGreen(255),
+                  color: Theme.of(context).colorScheme.onSecondary,
                   borderRadius: const BorderRadius.vertical(
                     bottom: Radius.circular(8),
                   ),

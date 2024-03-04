@@ -10,3 +10,4 @@ const Color kbuttonColor = Color(0xfff7f6f8);
 const Color ktextfieldcolor = Color(0xffF6F6F9);
 const Color kscaffoldDarkModColor = Color(0xff262727);
 const Color kgreen1 = Color(0xff5cae70);
+Color shadedGrey = Colors.grey.shade200;
