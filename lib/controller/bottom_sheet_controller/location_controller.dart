@@ -1,4 +1,3 @@
-import 'package:doots/controller/bottom_sheet_controller/icons.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -32,7 +31,7 @@ class LocationController extends GetxController {
   Future<void> getCurrentLocation() async {
     try {
       Position position = await determinePosition();
-      c.addchat(position, MessageType.location);
+      // c.addchat(position, MessageType.location);
     } catch (e) {
       Get.snackbar("error", e.toString());
     }

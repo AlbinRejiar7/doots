@@ -1,64 +1,97 @@
-import 'dart:io';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/models/message_model.dart';
+import 'package:doots/service/chat_services.dart';
 import 'package:doots/widgets/photo_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 class PhotoBubble extends StatelessWidget {
   const PhotoBubble({
     super.key,
-    required this.height,
-    required this.width,
-    required this.image,
-    required this.index,
-    required this.chats,
+    required this.message,
   });
 
-  final List<File> chats;
-  final double height;
-  final double width;
-  final int index;
-  final image;
+  final Message message;
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GestureDetector(
-          onTap: () {
-            Get.to(
-              () => PhotoViewer(
-                initialIndex: index,
-                tag: 'hero-tag-$index',
-                files: chats,
-              ),
-            );
-          },
+    var height = context.height;
+    var width = context.width;
+    bool isUser = (message.fromId == ChatService.user.uid);
+
+    if (!isUser && message.read.isEmpty) {
+      ChatService.updateMessageStatus(message);
+    }
+    return GestureDetector(
+      onTap: () {
+        Get.to(
+            () => PhotoViewer(
+                  isUser: isUser,
+                  image: message.msg,
+                ),
+            transition: Transition.fadeIn);
+      },
+      child: Padding(
+        padding: EdgeInsets.all(width * 0.02),
+        child: Container(
+          padding: EdgeInsets.all(width * 0.01),
+          margin: isUser
+              ? EdgeInsets.only(left: width * 0.46)
+              : EdgeInsets.only(right: width * 0.46),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(width * 0.02),
+                topRight: Radius.circular(width * 0.02),
+                bottomLeft:
+                    isUser ? Radius.circular(width * 0.02) : Radius.circular(0),
+                bottomRight: isUser
+                    ? Radius.circular(0)
+                    : Radius.circular(width * 0.02)),
+            color: kgreen1,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                alignment: Alignment.centerRight,
                 height: height * 0.3,
-                margin: EdgeInsets.only(left: width * 0.48),
-                child: Hero(
-                    tag: 'hero-tag-$index',
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: kgreen1.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(7),
-                          image: DecorationImage(
-                              fit: BoxFit.cover, image: FileImage(image))),
-                    )),
+                width: width * 0.5,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(7),
+                    image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: CachedNetworkImageProvider(message.msg))),
               ),
-              Text(DateFormat.jm().format(DateTime.now()),
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge
-                      ?.copyWith(fontSize: 12)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                      ChatService.convertTimestampTo12HrTime(
+                          int.parse(message.sent)),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(fontSize: 12)),
+                  if (message.read.isEmpty)
+                    isUser
+                        ? Icon(
+                            size: width * 0.05,
+                            Icons.done,
+                          )
+                        : SizedBox.fromSize(),
+                  if (message.read.isNotEmpty)
+                    isUser
+                        ? Icon(
+                            size: width * 0.05,
+                            Icons.done_all,
+                            color: Colors.blue,
+                          )
+                        : SizedBox.fromSize(),
+                ],
+              ),
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

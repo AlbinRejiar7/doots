@@ -64,7 +64,20 @@ dependencies:
   url_launcher: ^6.2.5
   path: ^1.9.0
   flutter_file_downloader: ^1.1.0+1
-  http: ^1.2.1
+  firebase_core: ^2.24.2
+  cloud_firestore: ^4.14.0
+  firebase_auth: ^4.16.0
+  firebase_storage: ^11.6.0
+  cached_network_image: ^3.3.1
+  audioplayers: ^5.2.1
+  just_audio: ^0.9.36
+  dio: ^5.4.1
+  http: ^1.2.0
+  gallery_saver_updated: ^3.0.0
+  fluttertoast: ^8.1.1
+  audio_waveforms: ^1.0.5
+  flutter_audio_waveforms: ^1.2.1+8
+  swipe_to: ^1.0.6
 
 
 
@@ -97,8 +110,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/icons/
-    - assets/notification/Notification.mp3
     - assets/images/icons/Img.png
+    - assets/sounds/WhatsAppSendingMessageSoundEffect.mp3
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

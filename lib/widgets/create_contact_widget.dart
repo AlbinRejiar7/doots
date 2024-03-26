@@ -1,10 +1,12 @@
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/contact_screen_controller.dart';
+import 'package:doots/service/chat_services.dart';
 import 'package:doots/widgets/custom_auth_button.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
 import 'package:doots/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class CreateContactPage extends StatelessWidget {
@@ -42,7 +44,8 @@ class CreateContactPage extends StatelessWidget {
                 ),
                 kHeight(height * 0.01),
                 CustomTextField(
-                  prefix: Icon(Icons.email),
+                  controller: c.emailCtr,
+                  prefix: const Icon(Icons.email),
                   filled: true,
                   fillColor: Theme.of(context).primaryColor,
                   hintText: 'Enter Email',
@@ -62,7 +65,7 @@ class CreateContactPage extends StatelessWidget {
                 ),
                 kHeight(height * 0.01),
                 CustomTextField(
-                  prefix: Icon(Icons.person),
+                  prefix: const Icon(Icons.person),
                   controller: c.nameCtr,
                   hintText: 'Enter name',
                   isBoarder: false,
@@ -78,12 +81,21 @@ class CreateContactPage extends StatelessWidget {
                       child: SizedBox(
                         width: width * 0.23,
                         child: CustomAuthButton(
-                          title: "Invite",
+                          title: "Add",
                           onTap: () {
-                            if (c.nameCtr.text.isNotEmpty) {
-                              c.addNamesTolist(c.nameCtr.text);
-                              c.nameCtr.clear();
-                              Get.back();
+                            if (c.emailCtr.text.isNotEmpty) {
+                              ChatService.addContacts(c.emailCtr.text)
+                                  .then((isUserExists) {
+                                if (isUserExists) {
+                                  Fluttertoast.showToast(msg: "Contact Added");
+                                  c.emailCtr.clear();
+                                  c.nameCtr.clear();
+                                  Get.back();
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "User Doesn't Exists");
+                                }
+                              });
                             }
                           },
                         ),

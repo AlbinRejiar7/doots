@@ -1,12 +1,9 @@
-import 'dart:developer';
-
 import 'package:doots/controller/contact_screen_controller.dart';
-import 'package:doots/view/chating_screen/chating_screen.dart';
+import 'package:doots/view/contacts_screen/contacts_stream_widget.dart';
 import 'package:doots/widgets/create_contact_widget.dart';
 import 'package:doots/widgets/plus_card_widget.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
-import 'package:doots/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -37,7 +34,7 @@ class ContactsScreen extends StatelessWidget {
                   plusCardButton(
                     height,
                     () {
-                      Get.to(() => CreateContactPage(),
+                      Get.to(() => const CreateContactPage(),
                           transition: Transition.downToUp);
                     },
                   )
@@ -50,85 +47,11 @@ class ContactsScreen extends StatelessWidget {
                   filled: true,
                   fillColor: Theme.of(context).primaryColor,
                   hintText: "Search Contacts.."),
-              Expanded(
-                child: Obx(() {
-                  return Padding(
-                    padding: EdgeInsets.only(top: height * 0.02),
-                    child: ListView.builder(
-                      itemCount: c.foundedUsers.length,
-                      itemBuilder: (context, index) {
-                        c.contacts.sort((a, b) {
-                          return a['name']
-                              .toLowerCase()
-                              .compareTo(b['name'].toLowerCase());
-                        });
-                        if (index == 0 ||
-                            c.foundedUsers[index]['name'][0] !=
-                                c.foundedUsers[index - 1]['name'][0]) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CustomTextWidget(
-                                    text: c.foundedUsers[index]['name'][0],
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  kWidth(width * 0.02),
-                                  Expanded(
-                                      child: Divider(
-                                    thickness: 0,
-                                  )),
-                                ],
-                              ),
-                              ListTile(
-                                onTap: () {
-                                  c.tappedIndex(index);
-                                  log(c.currentIndex.value.toString());
-                                  Get.to(
-                                    () => ChattingScreen(),
-                                  );
-                                },
-                                leading: CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      "https://dpwalay.com/wp-content/uploads/2023/11/dazzling-girl-dp-for-whatsapp.jpg"),
-                                ),
-                                title: Text(c.foundedUsers[index]['name']),
-                                // trailing: IconButton(
-                                //     onPressed: () {},
-                                //     icon: Icon(
-                                //       Icons.more_vert,
-                                //       color: kGreen,
-                                //     )),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return ListTile(
-                            onTap: () {
-                              c.tappedIndex(index);
-                              Get.to(() => ChattingScreen(),
-                                  arguments: c.foundedUsers[index]['name']);
-                            },
-                            leading: CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                  "https://dpwalay.com/wp-content/uploads/2023/11/dazzling-girl-dp-for-whatsapp.jpg"),
-                            ),
-                            title: Text(c.foundedUsers[index]['name']),
-                            // trailing: IconButton(
-                            //     onPressed: () {},
-                            //     icon: Icon(
-                            //       Icons.more_vert,
-                            //       color: kGreen,
-                            //     )),
-                          );
-                        }
-                      },
-                    ),
-                  );
-                }),
-              )
+              Obx(() {
+                return c.noResultsFound.value
+                    ? Text("No Contacts Found")
+                    : ContactsStreamBuilder(c: c, height: height, width: width);
+              }),
             ],
           ),
         ),

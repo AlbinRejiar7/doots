@@ -11,15 +11,14 @@ class CustomTextField extends StatelessWidget {
   final Color? fillColor;
   final bool? filled;
   final bool isBoarder;
-  int? maxLines = 1;
-  final bool? isMaxLine;
   final void Function(String)? onChanged;
   final void Function()? onTap;
   final TextStyle? style;
   final Widget? prefix;
   final bool isChattingScreen;
-
-  CustomTextField({
+  final void Function(String?)? onSaved;
+  final String? labelText;
+  const CustomTextField({
     super.key,
     required this.hintText,
     this.focusNode,
@@ -31,26 +30,30 @@ class CustomTextField extends StatelessWidget {
     this.filled,
     this.isBoarder = true,
     this.onChanged,
-    this.maxLines,
-    this.isMaxLine = false,
     this.onTap,
     this.style,
     this.prefix,
     this.isChattingScreen = false,
+    this.onSaved,
+    this.labelText,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLines: obscureText ? 1 : 5,
+      minLines: 1,
+      onSaved: onSaved,
       style: style,
       onTap: onTap,
-      maxLines: isMaxLine! ? maxLines : 1,
       onChanged: onChanged,
       obscureText: obscureText,
       controller: controller,
       validator: validator,
       focusNode: focusNode,
       decoration: InputDecoration(
+          labelStyle: Theme.of(context).textTheme.bodyLarge,
+          labelText: labelText,
           prefixIcon: prefix,
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),

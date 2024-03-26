@@ -1,5 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/controller/auth_controller.dart';
 import 'package:doots/controller/home_screen_controller.dart';
+import 'package:doots/service/chat_services.dart';
+import 'package:doots/view/auth/choose_page.dart';
 import 'package:doots/view/change_password/change_password_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +23,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
     var height = context.height;
     var width = context.width;
     var c = Get.put(HomeScreenController());
+    var authCtr = Get.put(AuthController());
     return Container(
       height: height * 0.08,
       width: width,
@@ -70,100 +75,116 @@ class CustomBottomNavigationBar extends StatelessWidget {
             );
           }),
           PopupMenuButton<int>(
-            onSelected: (value) {
-              if (value == 0) {
-                c.onTapBottomBar(4);
-              } else if (value == 1) {
-                c.onTapBottomBar(5);
-              } else if (value == 2) {
-                Get.to(() => ChangePasswordScreen());
-              }
-            },
-            color: Theme.of(context).primaryColor,
-            surfaceTintColor: Colors.transparent,
-            offset: Offset((width * 0.5), -(height * 0.33)),
-            itemBuilder: (context) => [
-              PopupMenuItem<int>(
-                  value: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Profile",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Icon(
-                        Icons.person_3_outlined,
-                        size: 16,
-                      )
-                    ],
-                  )),
-              PopupMenuItem<int>(
-                  value: 1,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Settings",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Icon(
-                        Icons.settings_outlined,
-                        size: 16,
-                      )
-                    ],
-                  )),
-              PopupMenuItem<int>(
-                  value: 2,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Change password",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Icon(
-                        Icons.lock_open_rounded,
-                        size: 16,
-                      )
-                    ],
-                  )),
-              PopupMenuItem<int>(
-                  value: 3,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Log out",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Icon(
-                        Icons.logout_rounded,
-                        size: 16,
-                      )
-                    ],
-                  )),
-              PopupMenuItem<int>(
-                  value: 4,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Delete account",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Icon(
-                        Icons.person_3_outlined,
-                        size: 16,
-                      )
-                    ],
-                  )),
-            ],
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                  'https://officesnapshots.com/wp-content/uploads/2023/05/dp-world-offices-london-16-700x467-compact.jpg'),
-            ),
-          ),
+              onSelected: (value) async {
+                if (value == 0) {
+                  c.onTapBottomBar(4);
+                } else if (value == 1) {
+                  c.onTapBottomBar(5);
+                } else if (value == 2) {
+                  Get.to(() => const ChangePasswordScreen());
+                } else if (value == 3) {
+                  await authCtr.signOut().then((value) {
+                    Get.snackbar("Log out", 'Successfull');
+                    Get.offAll(() => const ChoosingPage());
+                  });
+                }
+              },
+              color: Theme.of(context).primaryColor,
+              surfaceTintColor: Colors.transparent,
+              offset: Offset((width * 0.5), -(height * 0.33)),
+              itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                        value: 0,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Profile",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Icon(
+                              Icons.person_3_outlined,
+                              size: 16,
+                            )
+                          ],
+                        )),
+                    PopupMenuItem<int>(
+                        value: 1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Settings",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Icon(
+                              Icons.settings_outlined,
+                              size: 16,
+                            )
+                          ],
+                        )),
+                    PopupMenuItem<int>(
+                        value: 2,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Change password",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Icon(
+                              Icons.lock_open_rounded,
+                              size: 16,
+                            )
+                          ],
+                        )),
+                    PopupMenuItem<int>(
+                        value: 3,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Log out",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Icon(
+                              Icons.logout_rounded,
+                              size: 16,
+                            )
+                          ],
+                        )),
+                    PopupMenuItem<int>(
+                        value: 4,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Delete account",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Icon(
+                              Icons.person_3_outlined,
+                              size: 16,
+                            )
+                          ],
+                        )),
+                  ],
+              child: StreamBuilder(
+                stream: ChatService.getMyUserData(),
+                builder: (context, snapshot) {
+                  final myData = snapshot.data;
+                  if (myData != null) {
+                    return CircleAvatar(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundImage:
+                            CachedNetworkImageProvider(myData.image!));
+                  } else {
+                    return CircularProgressIndicator(
+                      strokeWidth: 2,
+                    );
+                  }
+                },
+              )),
         ],
       ),
     );

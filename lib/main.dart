@@ -1,21 +1,54 @@
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/constants/global.dart';
 import 'package:doots/controller/home_screen_controller.dart';
+import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/auth/choose_page.dart';
+import 'package:doots/view/home/home_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark));
   await GetStorage.init();
 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    ChatService.updateActiveStatus(true);
+
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      if (message.toString().contains("resume")) {
+        ChatService.updateActiveStatus(true);
+      }
+      if (message.toString().contains("pause")) {
+        ChatService.updateActiveStatus(false);
+      }
+
+      return Future.value(message);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +57,7 @@ class MyApp extends StatelessWidget {
     return Obx(() {
       return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          themeMode: c.isdarkmode.value ? ThemeMode.dark : ThemeMode.light,
+          themeMode: !c.isdarkmode.value ? ThemeMode.dark : ThemeMode.light,
           darkTheme: ThemeData.dark().copyWith(
             appBarTheme: const AppBarTheme().copyWith(
               backgroundColor: kscaffoldDarkModColor,
@@ -82,7 +115,9 @@ class MyApp extends StatelessWidget {
                   bodyLarge: TextStyle(
                     color: kblack.withOpacity(0.6),
                   ))),
-          home: const ChoosingPage());
+          home: authInstance.currentUser == null
+              ? const ChoosingPage()
+              : const HomeScreen());
     });
   }
 }

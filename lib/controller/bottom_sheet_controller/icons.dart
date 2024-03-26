@@ -12,12 +12,13 @@ enum MessageType {
 }
 
 List<String> title = [
-  'ATTACHMENT',
+  'DOCUMENTS',
   "CAMERA",
   "PHOTO",
   "AUDIO",
   "LOCATION",
   "CONTACTS",
+  "VIDEOS"
 ];
 List<IconData> myIcons = [
   Icons.edit_document,
@@ -26,4 +27,5 @@ List<IconData> myIcons = [
   Icons.headset,
   Icons.location_on,
   Icons.contacts,
+  Icons.video_library
 ];

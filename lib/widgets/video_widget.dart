@@ -1,38 +1,39 @@
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
+import 'package:doots/models/message_model.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoGallery extends StatelessWidget {
-  final int initialIndex;
-  final List<File> videoFiles;
-
+  final bool isUser;
+  final Message message;
   const VideoGallery({
     Key? key,
-    required this.initialIndex,
-    required this.videoFiles,
+    required this.message,
+    required this.isUser,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        itemCount: videoFiles.length,
-        controller: PageController(initialPage: initialIndex),
-        itemBuilder: (context, index) {
-          return VideoPlayerScreen(videoFile: videoFiles[index]);
-        },
-      ),
-    );
+        body: VideoPlayerScreen(
+      isUser: isUser,
+      message: message,
+    ));
   }
 }
 
 class VideoPlayerScreen extends StatefulWidget {
-  final File videoFile;
+  final Message message;
+  final bool isUser;
 
-  const VideoPlayerScreen({Key? key, required this.videoFile})
-      : super(key: key);
+  const VideoPlayerScreen({
+    Key? key,
+    required this.isUser,
+    required this.message,
+  }) : super(key: key);
 
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
@@ -49,8 +50,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _initializeVideoPlayerFuture = initializeVideoPlayer();
   }
 
+  var data = GetStorage();
   Future<void> initializeVideoPlayer() async {
-    _videoPlayerController = VideoPlayerController.file(widget.videoFile);
+    if (widget.isUser) {
+      _videoPlayerController =
+          VideoPlayerController.file(File(widget.message.localFileLocation));
+    } else {
+      _videoPlayerController =
+          VideoPlayerController.file(File(data.read(widget.message.filename)));
+    }
+
     await _videoPlayerController.initialize();
     setState(() {
       aspectRatio = _videoPlayerController.value.aspectRatio;

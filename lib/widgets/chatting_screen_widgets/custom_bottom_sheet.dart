@@ -9,12 +9,15 @@ class CustomBottomSheet extends StatelessWidget {
     required this.height,
     required this.title,
     required this.myIcons,
+    required this.groupId,
+    required this.chatUserId,
   });
-
+  final String chatUserId;
   final double width;
   final double height;
   final List<String> title;
   final List<IconData> myIcons;
+  final String? groupId;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +37,8 @@ class CustomBottomSheet extends StatelessWidget {
         itemCount: title.length,
         itemBuilder: (BuildContext context, int index) {
           return CustomAttachement(
+              groupId: groupId ?? "",
+              chatUserId: chatUserId,
               index: index,
               color: kgreen1.withOpacity(0.2),
               title: title[index],
