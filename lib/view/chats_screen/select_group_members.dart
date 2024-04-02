@@ -1,5 +1,6 @@
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/contact_screen_controller.dart';
+import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/contacts_screen/contacts_stream_widget.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
@@ -7,7 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SelectGroupMembers extends StatelessWidget {
-  const SelectGroupMembers({super.key});
+  final bool isUpdatingMembers;
+  final String? groupId;
+  final List<String>? currentMembers;
+  const SelectGroupMembers(
+      {super.key,
+      required this.isUpdatingMembers,
+      this.currentMembers,
+      this.groupId});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +32,12 @@ class SelectGroupMembers extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.done_outline_sharp),
           onPressed: () {
-            Get.back();
+            if (isUpdatingMembers) {
+              ChatService.addNewMembersToGroup(
+                  groupId!, c.selectedMembers, currentMembers!);
+            } else {
+              Get.back();
+            }
           }),
       body: SafeArea(
         child: Padding(

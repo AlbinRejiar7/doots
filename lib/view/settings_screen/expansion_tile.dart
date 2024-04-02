@@ -1,7 +1,5 @@
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/service/chat_services.dart';
-import 'package:doots/view/settings_screen/color_picker.dart';
-import 'package:doots/view/settings_screen/dropdown.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
@@ -46,9 +44,6 @@ class SettingsList extends StatelessWidget {
                                 )
                               ],
                             ),
-                            // CustomCardButton(
-                            //   icon: Icons.edit,
-                            // )
                           ],
                         ),
                         kHeight(height * 0.02),
@@ -88,8 +83,7 @@ class SettingsList extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             CustomTextWidget(
-                              text: "ChatService.user.phoneNumber " ??
-                                  "loading..",
+                              text: myData?.phoneNumber ?? "loading..",
                               fontWeight: FontWeight.w600,
                             )
                           ],
@@ -105,10 +99,6 @@ class SettingsList extends StatelessWidget {
                                   "Status",
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
-                                // CustomCardButton(
-                                //   icon: Icons.edit,
-                                //   onTap: () {},
-                                // )
                               ],
                             ),
                             CustomTextWidget(
@@ -123,119 +113,117 @@ class SettingsList extends StatelessWidget {
                   )
                 ],
               ),
-              MyExpansionTile(
-                title: 'Themes',
-                icon: Icons.color_lens,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: width * 0.03),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+              // MyExpansionTile(
+              //   title: 'Themes',
+              //   icon: Icons.color_lens,
+              //   children: [
+              //     Padding(
+              //       padding: EdgeInsets.symmetric(horizontal: width * 0.03),
+              //       child: Column(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         mainAxisSize: MainAxisSize.min,
+              //         children: [
+              //           Text(
+              //             'CHOOSE THEME COLOR :',
+              //             style: Theme.of(context)
+              //                 .textTheme
+              //                 .bodyLarge!
+              //                 .copyWith(fontSize: 13),
+              //           ),
+              //           kHeight(height * 0.02),
+              //           ColorPicker(),
+              //           kHeight(height * 0.02),
+              //         ],
+              //       ),
+              //     )
+              //   ],
+              // ),
+              StreamBuilder(
+                  stream: ChatService.getMyUserData(),
+                  builder: (context, snapshot) {
+                    var chatUser = snapshot.data;
+                    bool? isProfilephoto = false;
+                    bool? isLastSeen = false;
+                    bool? isReadreceipt = false;
+                    if (chatUser != null) {
+                      isProfilephoto = chatUser.isPhotoOn;
+                      isLastSeen = chatUser.isLastSeenOn;
+                      isReadreceipt = chatUser.isReadReceiptOn;
+                    }
+
+                    return MyExpansionTile(
+                      title: 'Privacy',
+                      icon: Icons.privacy_tip,
                       children: [
-                        Text(
-                          'CHOOSE THEME COLOR :',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(fontSize: 13),
-                        ),
-                        kHeight(height * 0.02),
-                        ColorPicker(),
-                        kHeight(height * 0.02),
+                        Padding(
+                          padding: EdgeInsets.all(width * 0.03),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Profile Photo",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Switch(
+                                      activeColor: kgreen1,
+                                      value: isProfilephoto ?? false,
+                                      onChanged: (value) =>
+                                          ChatService.isProfilePhotoVisibile(
+                                              value))
+                                ],
+                              ),
+                              kHeight(height * 0.02),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Last Seen",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Switch(
+                                      activeColor: kgreen1,
+                                      value: isLastSeen ?? false,
+                                      onChanged: (value) {
+                                        ChatService.isLastSeenVisible(value);
+                                      })
+                                ],
+                              ),
+                              kHeight(height * 0.02),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Read receipts",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Switch(
+                                      activeColor: kgreen1,
+                                      value: isReadreceipt ?? false,
+                                      onChanged: (value) {
+                                        ChatService.isReadOn(value);
+                                      })
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
                       ],
-                    ),
-                  )
-                ],
-              ),
-              MyExpansionTile(
-                title: 'Privacy',
-                icon: Icons.privacy_tip,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(width * 0.03),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Profile Photo",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            MyDropdownButton(),
-                          ],
-                        ),
-                        kHeight(height * 0.02),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Last Seen",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Switch(
-                                activeColor: kgreen1,
-                                value: true,
-                                onChanged: (a) {})
-                          ],
-                        ),
-                        kHeight(height * 0.02),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Status",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            MyDropdownButton()
-                          ],
-                        ),
-                        kHeight(height * 0.02),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Read receipts",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Switch(
-                                activeColor: kgreen1,
-                                value: true,
-                                onChanged: (a) {})
-                          ],
-                        ),
-                        kHeight(height * 0.02),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Read receipts",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            MyDropdownButton()
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                    );
+                  }),
               MyExpansionTile(
                 title: 'Security',
                 icon: Icons.security,
@@ -335,34 +323,6 @@ class SettingsList extends StatelessWidget {
         });
   }
 }
-
-// class CustomCardButton extends StatelessWidget {
-//   final IconData icon;
-//   final void Function()? onTap;
-//   const CustomCardButton({
-//     super.key,
-//     required this.icon,
-//     this.onTap,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     var height = context.height;
-//     return SizedBox(
-//       height: height * 0.07,
-//       width: height * 0.07,
-//       child: InkWell(
-//         onTap: onTap,
-//         child: Card(
-//           child: Icon(
-//             icon,
-//             color: kgreen1,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 class MyExpansionTile extends StatelessWidget {
   final String title;

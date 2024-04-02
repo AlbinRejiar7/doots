@@ -18,6 +18,7 @@ class CustomTextField extends StatelessWidget {
   final bool isChattingScreen;
   final void Function(String?)? onSaved;
   final String? labelText;
+  final TextInputType? keyboardType;
   const CustomTextField({
     super.key,
     required this.hintText,
@@ -36,11 +37,13 @@ class CustomTextField extends StatelessWidget {
     this.isChattingScreen = false,
     this.onSaved,
     this.labelText,
+    this.keyboardType,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      keyboardType: keyboardType,
       maxLines: obscureText ? 1 : 5,
       minLines: 1,
       onSaved: onSaved,

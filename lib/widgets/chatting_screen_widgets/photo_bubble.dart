@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doots/constants/color_constants.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/widgets/photo_view.dart';
@@ -48,7 +47,9 @@ class PhotoBubble extends StatelessWidget {
                 bottomRight: isUser
                     ? Radius.circular(0)
                     : Radius.circular(width * 0.02)),
-            color: kgreen1,
+            color: isUser
+                ? Theme.of(context).colorScheme.tertiary
+                : Theme.of(context).colorScheme.tertiaryContainer,
           ),
           child: Column(
             children: [

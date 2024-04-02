@@ -71,7 +71,9 @@ class VideoBubble extends StatelessWidget {
                 bottomRight: isUser
                     ? Radius.circular(0)
                     : Radius.circular(width * 0.02)),
-            color: kgreen1,
+            color: isUser
+                ? Theme.of(context).colorScheme.tertiary
+                : Theme.of(context).colorScheme.tertiaryContainer,
           ),
           child: Column(
             crossAxisAlignment:

@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/global.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/service/chat_services.dart';
+import 'package:doots/view/home/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +19,7 @@ class AuthController extends GetxController {
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController locationController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   var isVisibile = false.obs;
   var isConfirmPasswordVisible = false.obs;
   void changeLoadingState(bool value) {
@@ -68,6 +71,7 @@ class AuthController extends GetxController {
     try {
       await authInstance.createUserWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);
+
       final uid = authInstance.currentUser!.uid;
       authInstance.currentUser!.updateDisplayName(
         userNameController.text,
@@ -82,6 +86,7 @@ class AuthController extends GetxController {
         imageUrl = await ref.getDownloadURL();
       }
       final chatUser = ChatUser(
+        phoneNumber: phoneController.text,
         id: uid,
         name: userNameController.text,
         email: emailController.text,
@@ -92,13 +97,13 @@ class AuthController extends GetxController {
         pushToken: '',
         lastActive: time,
         createdAt: time,
-        isTyping: false,
       );
 
       await FirebaseFirestore.instance
           .collection("users")
           .doc(uid)
           .set(chatUser.toJson());
+      Get.snackbar("Account Created Successfully", "Successfully");
     } on FirebaseException catch (e) {
       Get.snackbar("Something Wrong", e.message.toString());
     }
@@ -108,8 +113,19 @@ class AuthController extends GetxController {
     try {
       await authInstance.signInWithEmailAndPassword(
           email: email, password: password);
-    } on FirebaseException catch (e) {
-      Get.snackbar("TITLE", e.message.toString());
+      ChatService.updateActiveStatus(true);
+      Get.offAll(() => const HomeScreen());
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase authentication errors
+      if (e.code == 'wrong-password' || e.code == 'user-not-found') {
+        Get.snackbar("Login Error", "Invalid email or password");
+      } else {
+        // For other Firebase exceptions, display the error message
+        Get.snackbar("Login Error", e.message ?? "An error occurred");
+      }
+    } catch (e) {
+      // Handle other exceptions
+      Get.snackbar("Login Error", e.toString());
     }
   }
 

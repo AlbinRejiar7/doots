@@ -10,7 +10,7 @@ import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/service/convert_to_date_time.dart';
 import 'package:doots/view/chating_screen/user_details_screen.dart';
-import 'package:doots/view/chats_screen/audio_player_widget.dart';
+import 'package:doots/widgets/chatting_screen_widgets/audio_player_widget.dart';
 import 'package:doots/widgets/chatting_screen_widgets/chat_bubble.dart';
 import 'package:doots/widgets/chatting_screen_widgets/custom_bottom_sheet.dart';
 import 'package:doots/widgets/chatting_screen_widgets/document_bubble.dart';
@@ -39,9 +39,26 @@ class ChattingScreen extends StatelessWidget {
     var gallaryCtr = Get.put(GallaryController());
 
     bool isSomeoneTyping = false;
+    String? photoImage;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
+
+      floatingActionButton: Obx(() {
+        return Padding(
+          padding: EdgeInsets.only(right: width * 0.04, bottom: height * 0.07),
+          child: Visibility(
+            visible: c.canScrollToOldest.value,
+            child: FloatingActionButton(
+                backgroundColor: kgreen1,
+                child: Icon(Icons.arrow_downward),
+                shape: CircleBorder(),
+                onPressed: () {
+                  c.scrollToOldest();
+                }),
+          ),
+        );
+      }),
       appBar: AppBar(
         shape: Border(
             bottom: BorderSide(
@@ -50,21 +67,29 @@ class ChattingScreen extends StatelessWidget {
           onTap: () {
             Get.to(() => DetailsScreen(
                   chatUser: chatUser,
+                  photoImage: photoImage,
                 ));
           },
           child: StreamBuilder(
               stream: ChatService.getUserInfo(chatUser),
               builder: (context, snapshot) {
-                final data = snapshot.data?.docs;
-                final list =
-                    data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
-                        [];
+                List<ChatUser> list = [];
+                if (snapshot.data != null) {
+                  final data = snapshot.data?.docs;
+                  list =
+                      data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
+                          [];
+
+                  photoImage = list[0].isPhotoOn != null && list[0].isPhotoOn!
+                      ? list[0].image
+                      : "https://www.dpforwhatsapp.in/img/no-dp/19.webp";
+                }
 
                 return Row(
                   children: [
                     CircleAvatar(
                         backgroundImage: list.isNotEmpty
-                            ? CachedNetworkImageProvider(list[0].image!)
+                            ? CachedNetworkImageProvider(photoImage!)
                             : CachedNetworkImageProvider(chatUser.image!)),
                     kWidth(width * 0.02),
                     Column(
@@ -109,15 +134,17 @@ class ChattingScreen extends StatelessWidget {
                                 }),
                         if (list.isNotEmpty)
                           if (!list[0].isOnline!)
-                            Text(
-                                formatMillisecondsSinceEpoch(
-                                    int.parse(list[0].lastActive!)),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.copyWith(
-                                        fontSize: 12,
-                                        overflow: TextOverflow.ellipsis))
+                            list[0].isLastSeenOn ?? true
+                                ? Text(
+                                    formatMillisecondsSinceEpoch(
+                                        int.parse(list[0].lastActive!)),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.copyWith(
+                                            fontSize: 12,
+                                            overflow: TextOverflow.ellipsis))
+                                : const SizedBox.shrink()
                       ],
                     )
                   ],
@@ -165,6 +192,7 @@ class ChattingScreen extends StatelessWidget {
 
                     if (c.chats.isNotEmpty) {
                       return ListView.builder(
+                          controller: c.scrollController,
                           padding: EdgeInsets.all(width * 0.02),
                           reverse: true,
                           itemCount: c.chats.length,
@@ -182,7 +210,6 @@ class ChattingScreen extends StatelessWidget {
                                   c.focusNode.requestFocus();
                                 },
                                 child: ChatBubble(
-                                  chatUserId: chatUser.id!,
                                   message: c.chats[index],
                                 ),
                               );

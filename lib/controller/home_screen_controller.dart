@@ -12,7 +12,7 @@ class HomeScreenController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    isdarkmode(data.read('theme'));
+    isdarkmode(data.read('theme') ?? false);
   }
 
   List bottomPages = [

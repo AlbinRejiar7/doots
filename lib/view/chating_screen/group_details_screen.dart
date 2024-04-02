@@ -6,9 +6,11 @@ import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
+import 'package:doots/view/chats_screen/select_group_members.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class GroupDetailsScreen extends StatelessWidget {
@@ -168,11 +170,46 @@ class GroupDetailsScreen extends StatelessWidget {
                         );
                       }),
                       kHeight(height * 0.01),
-                      Text(
-                        "Members",
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Members",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                          ),
+                          CircleAvatar(
+                              backgroundColor: kGreen.withOpacity(0.15),
+                              child: IconButton(
+                                onPressed: () {
+                                  if (groupChatInfo.adminId ==
+                                      ChatService.user.uid) {
+                                    Get.to(
+                                        () => SelectGroupMembers(
+                                              isUpdatingMembers: true,
+                                              currentMembers:
+                                                  groupChatInfo.membersId,
+                                              groupId: groupChatInfo.groupId,
+                                            ),
+                                        transition: Transition.downToUp);
+                                  } else {
+                                    Fluttertoast.showToast(
+                                        msg:
+                                            "Only Group Admin Can Add Members");
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.add,
+                                  color: kgreen1,
+                                  size: 15,
+                                ),
+                              ))
+                        ],
                       ),
                       kHeight(height * 0.01),
                       StreamBuilder(
@@ -217,6 +254,50 @@ class GroupDetailsScreen extends StatelessWidget {
                                           ),
                                           kWidth(width * 0.03),
                                           Text(groupMembersInfo[index].name!),
+                                          const Spacer(),
+                                          IconButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      AlertDialog(
+                                                    surfaceTintColor:
+                                                        Colors.transparent,
+                                                    backgroundColor: Theme.of(
+                                                            context)
+                                                        .scaffoldBackgroundColor,
+                                                    title: Text(
+                                                      "Do you want to remove this member ? ",
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyLarge,
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () async {
+                                                            ChatService.removeMemberFromGroup(
+                                                                groupChatInfo
+                                                                    .groupId,
+                                                                groupMembersInfo[
+                                                                        index]
+                                                                    .id!,
+                                                                groupChatInfo
+                                                                    .adminId);
+                                                          },
+                                                          child: Text("Yes")),
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            Get.back();
+                                                          },
+                                                          child: Text("No"))
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ))
                                         ],
                                       ),
                                     ),

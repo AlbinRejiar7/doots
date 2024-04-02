@@ -2,7 +2,6 @@ import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/auth_controller.dart';
 import 'package:doots/controller/profile_page_controller.dart';
 import 'package:doots/view/auth/signup_screen.dart';
-import 'package:doots/view/home/home_page.dart';
 import 'package:doots/widgets/custom_auth_button.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
@@ -129,8 +128,6 @@ class _SigninScreenState extends State<SigninScreen> {
                                   .then((value) async {
                                 c.changeLoadingState(false);
 
-                                Get.snackbar("Login", "Successfull");
-                                Get.offAll(() => const HomeScreen());
                                 c.emailController.clear();
                                 c.passwordController.clear();
                               });

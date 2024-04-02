@@ -10,7 +10,8 @@ import 'package:get/get.dart';
 
 class DetailsScreen extends StatelessWidget {
   final ChatUser chatUser;
-  const DetailsScreen({super.key, required this.chatUser});
+  final String? photoImage;
+  const DetailsScreen({super.key, required this.chatUser, this.photoImage});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class DetailsScreen extends StatelessWidget {
           decoration: BoxDecoration(
               image: DecorationImage(
                   fit: BoxFit.cover,
-                  image: CachedNetworkImageProvider(chatUser.image!)),
+                  image: CachedNetworkImageProvider(photoImage!)),
               borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10))),

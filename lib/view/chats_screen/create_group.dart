@@ -113,7 +113,10 @@ class CreateNewGroup extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20))),
                     onPressed: () {
-                      Get.to(() => SelectGroupMembers(),
+                      Get.to(
+                          () => SelectGroupMembers(
+                                isUpdatingMembers: false,
+                              ),
                           transition: Transition.downToUp);
                     },
                     child: Text(
@@ -171,40 +174,51 @@ class CreateNewGroup extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: width * 0.5,
-                    height: height * 0.06,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20))),
-                        onPressed: () {
-                          if (c.groupNameCtr.text.isNotEmpty &&
-                              c.descriptionCtr.text.isNotEmpty) {
-                            List<String> memberIds = [];
-                            if (contactCtr.selectedMembers.isNotEmpty) {
-                              contactCtr.selectedMembers.forEach((members) {
-                                memberIds.add(members.id!);
-                              });
-                            }
-                            ChatService.createGroup(
-                              c.groupNameCtr.text,
-                              c.descriptionCtr.text,
-                              memberIds,
-                              gallaryCtr.selectedImage.value,
-                            );
-                          }
-                        },
-                        child: Text(
-                          "Create",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(
-                                  color: kWhite, fontWeight: FontWeight.bold),
-                        )),
-                  ),
+                  Obx(() {
+                    return c.isGroupCreating.value
+                        ? CircularProgressIndicator(
+                            strokeWidth: 2,
+                          )
+                        : SizedBox(
+                            width: width * 0.5,
+                            height: height * 0.06,
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20))),
+                                onPressed: () {
+                                  c.isGroupCreating(true);
+                                  if (c.groupNameCtr.text.isNotEmpty &&
+                                      c.descriptionCtr.text.isNotEmpty) {
+                                    List<String> memberIds = [];
+                                    if (contactCtr.selectedMembers.isNotEmpty) {
+                                      contactCtr.selectedMembers
+                                          .forEach((members) {
+                                        memberIds.add(members.id!);
+                                      });
+                                    }
+
+                                    ChatService.createGroup(
+                                      c.groupNameCtr.text,
+                                      c.descriptionCtr.text,
+                                      memberIds,
+                                      gallaryCtr.selectedImage.value,
+                                    ).then((value) => c.isGroupCreating(false));
+                                  }
+                                },
+                                child: Text(
+                                  "Create",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .copyWith(
+                                          color: kWhite,
+                                          fontWeight: FontWeight.bold),
+                                )),
+                          );
+                  }),
                 ],
               ),
             ],

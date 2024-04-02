@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
@@ -11,7 +9,7 @@ import 'package:doots/models/group_model.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/chating_screen/group_details_screen.dart';
-import 'package:doots/view/chats_screen/audio_player_widget.dart';
+import 'package:doots/widgets/chatting_screen_widgets/audio_player_widget.dart';
 import 'package:doots/widgets/chatting_screen_widgets/chat_bubble.dart';
 import 'package:doots/widgets/chatting_screen_widgets/custom_bottom_sheet.dart';
 import 'package:doots/widgets/chatting_screen_widgets/document_bubble.dart';
@@ -37,13 +35,10 @@ class GroupChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log(groupId);
     var height = context.height;
     var width = context.width;
     var c = Get.put(ChattingScreenController());
-
     var audioCtr = Get.put(AudioController());
-
     var gallaryCtr = Get.put(GallaryController());
 
     bool isSomeoneTyping = false;
@@ -188,7 +183,6 @@ class GroupChatScreen extends StatelessWidget {
                                   c.focusNode.requestFocus();
                                 },
                                 child: ChatBubble(
-                                  chatUserId: '',
                                   message: c.chats[index],
                                 ),
                               );

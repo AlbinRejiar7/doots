@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
     return Obx(() {
       return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          themeMode: !c.isdarkmode.value ? ThemeMode.dark : ThemeMode.light,
+          themeMode: c.isdarkmode.value ? ThemeMode.dark : ThemeMode.light,
           darkTheme: ThemeData.dark().copyWith(
             appBarTheme: const AppBarTheme().copyWith(
               backgroundColor: kscaffoldDarkModColor,
@@ -67,6 +67,8 @@ class _MyAppState extends State<MyApp> {
               color: kWhite.withOpacity(0.6),
             ),
             colorScheme: const ColorScheme.dark().copyWith(
+                tertiary: kDarkModeUserChatColor,
+                tertiaryContainer: kDarkModeOtherUserChatColor,
                 onSecondary: kgreen1.withGreen(255),
                 primary: kWhite,
                 secondary: kWhite.withOpacity(0.6),
@@ -90,15 +92,18 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           theme: ThemeData.light().copyWith(
-              appBarTheme: const AppBarTheme()
-                  .copyWith(backgroundColor: kWhite, surfaceTintColor: kWhite),
+              appBarTheme: const AppBarTheme().copyWith(
+                  backgroundColor: kscaffoldLightModColor,
+                  surfaceTintColor: kscaffoldLightModColor),
               iconTheme: IconThemeData(
                 color: kblack.withOpacity(0.6),
               ),
-              dialogBackgroundColor: kWhite,
-              scaffoldBackgroundColor: kWhite,
+              dialogBackgroundColor: kscaffoldLightModColor,
+              scaffoldBackgroundColor: kscaffoldLightModColor,
               brightness: Brightness.light,
               colorScheme: const ColorScheme.light().copyWith(
+                  tertiary: kLightModeUserChatColor,
+                  tertiaryContainer: kLightModeOtherUserChatColor,
                   onSecondary: kblack,
                   primary: kblack,
                   secondary: kblack.withOpacity(0.6),

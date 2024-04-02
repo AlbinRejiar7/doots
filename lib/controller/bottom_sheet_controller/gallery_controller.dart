@@ -70,10 +70,8 @@ class GallaryController extends GetxController {
     pickedImage = await ImagePicker().pickMultiImage(imageQuality: 70);
     if (pickedImage != null) {
       for (var xfile in pickedImage!) {
-        changeUploadingState(true);
         await ChatService.sendImage(
             chatUserId, groupId, File(xfile.path), 'image');
-        changeUploadingState(false);
       }
     } else {
       if (kDebugMode) {

@@ -13,7 +13,7 @@ class ChatPopupMenu extends StatelessWidget {
         onSelected: (String value) {
           // Handle menu item selection here
           switch (value) {
-            case 'Favorite':
+            case 'Pin':
               break;
             case 'Audio':
               // Handle audio option
@@ -33,7 +33,7 @@ class ChatPopupMenu extends StatelessWidget {
           }
         },
         itemBuilder: (BuildContext context) => [
-          'Favorite',
+          'Pin',
           'Audio',
           'Video',
           'Archive',
@@ -54,8 +54,8 @@ class ChatPopupMenu extends StatelessWidget {
 
   Icon _getIcon(String item) {
     switch (item) {
-      case 'Favorite':
-        return Icon(Icons.star);
+      case 'Pin':
+        return Icon(Icons.push_pin);
       case 'Audio':
         return Icon(Icons.mic);
       case 'Video':

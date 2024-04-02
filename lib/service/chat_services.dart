@@ -4,6 +4,9 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/global.dart';
+import 'package:doots/controller/bottom_sheet_controller/gallery_controller.dart';
+import 'package:doots/controller/chatting_screen_controller.dart';
+import 'package:doots/controller/contact_screen_controller.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/models/message_model.dart';
@@ -178,7 +181,9 @@ class ChatService {
     String? thumbnailPath,
     String? duration,
     String? replyMessage,
+    String? name,
   }) async {
+    var c = Get.put(ChattingScreenController());
     if (chatUserId.isNotEmpty) {
       final Message individualMessage = Message(
           replyMessage: replyMessage ?? '',
@@ -197,14 +202,23 @@ class ChatService {
           messageType: type,
           fromId: user.uid,
           sent: DateTime.now().millisecondsSinceEpoch.toString());
+      // final ref = firestore
+      //     .collection('chats/${getConversationID(chatUserId)}/messages/');
+      c.scrollToOldest();
       final ref = firestore
-          .collection('chats/${getConversationID(chatUserId)}/messages/');
-      await setUnreadCount(chatUserId: chatUserId);
+          .collection("chats")
+          .doc(getConversationID(chatUserId))
+          .collection("messages");
+
       await ref.doc(individualMessage.sent).set(individualMessage.toJson());
 
       await playSendMessageSound();
+      await setUnreadCount(
+        chatUserId: chatUserId,
+      );
     } else if (groupId.isNotEmpty) {
       final Message groupMessage = Message(
+          name: name,
           replyMessage: replyMessage ?? '',
           duration: duration ?? "",
           localThumbnailPath: localThumbnailPath ?? "",
@@ -250,16 +264,25 @@ class ChatService {
     });
   }
 
-  static Future<void> setUnreadCount({required String chatUserId}) async {
-    String conversationID = getConversationID(chatUserId);
-
+  static Future<void> setUnreadCount({
+    required String chatUserId,
+  }) async {
     DocumentReference<Map<String, dynamic>> metadataRef =
-        firestore.collection('chats').doc(conversationID);
-
-    // Update the unread count for the recipient (not the sender)
+        firestore.collection("chats").doc(getConversationID(chatUserId));
     String unreadCountField = 'user${chatUserId}UnreadCount';
 
-    await metadataRef.update({unreadCountField: FieldValue.increment(1)});
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await metadataRef.get();
+
+      if (snapshot.exists) {
+        await metadataRef.update({unreadCountField: FieldValue.increment(1)});
+      } else {
+        await metadataRef.set({unreadCountField: 1});
+      }
+    } catch (error) {
+      print('Error setting unread count: $error');
+      // Handle the error accordingly
+    }
   }
 
   static Future<void> resetUnreadCount({
@@ -280,10 +303,75 @@ class ChatService {
     }
   }
 
-  static Future<void> uploadNewProfilePicture(
-    String currentUserId,
-    File? imageFile,
+  static void removeMemberFromGroup(
+    String groupId,
+    String memberToRemove,
+    String adminId,
   ) async {
+    if (memberToRemove == adminId) {
+      // Do not remove the admin
+      Fluttertoast.showToast(msg: 'Cannot remove admin from the group');
+      return;
+    }
+
+    DocumentReference groupRef =
+        FirebaseFirestore.instance.collection('groups').doc(groupId);
+
+    // Update the group to remove the member
+    await groupRef.update({
+      'membersId': FieldValue.arrayRemove([memberToRemove]),
+    }).then((_) {
+      print('Member removed successfully');
+      Fluttertoast.showToast(msg: 'Member removed successfully');
+    }).catchError((error) {
+      print('Failed to remove member: $error');
+      Fluttertoast.showToast(msg: 'Failed to remove member: $error');
+    });
+  }
+
+  static void addNewMembersToGroup(
+    String groupId,
+    List<ChatUser> selectedMembersChatUser,
+    List<String> currentMembers,
+  ) async {
+    DocumentReference groupRef = firestore.collection('groups').doc(groupId);
+    List<String> selectedMembers =
+        selectedMembersChatUser.map((chatUser) => chatUser.id!).toList();
+
+    log(selectedMembers.toString());
+
+    // Check for existing members
+    List<String> existingMembers = selectedMembers
+        .where((member) => currentMembers.contains(member))
+        .toList();
+
+    if (existingMembers.isNotEmpty) {
+      // Show a toast message indicating members already in the group
+      Fluttertoast.showToast(
+          msg: '${existingMembers.join(', ')} already in the group');
+      return;
+    }
+
+    // Update the group with new members
+    await groupRef.update({
+      'membersId': FieldValue.arrayUnion(selectedMembers),
+    }).then((_) {
+      print('Members added successfully');
+      Fluttertoast.showToast(msg: 'Members added successfully');
+    }).catchError((error) {
+      print('Failed to add members: $error');
+      Fluttertoast.showToast(msg: 'Failed to add members: $error');
+    });
+  }
+
+  static Future<void> updateUserData({
+    required String currentUserId,
+    File? imageFile,
+    required String name,
+    required String location,
+    required String status,
+    required String number,
+  }) async {
     try {
       if (imageFile != null) {
         final newRef = storage.ref().child("profileimage/$currentUserId.jpg");
@@ -296,6 +384,12 @@ class ChatService {
             .update({'image': imageUrl}).then(
                 (value) => Fluttertoast.showToast(msg: "Updated Successfully"));
       }
+      firestore.collection('users').doc(currentUserId).update({
+        'name': name,
+        "location": location,
+        "about": status,
+        "phoneNumber": number
+      }).then((value) => Fluttertoast.showToast(msg: "Updated Successfully"));
     } on FirebaseException catch (e) {
       log('Error deleting file: ${e.message}');
       // Handle any errors that occur during the deletion process
@@ -386,13 +480,15 @@ class ChatService {
   static Future<void> sendImage(
       String chatUserId, String groupId, File image, String type) async {
     try {
+      var gallaryCtr = Get.put(GallaryController());
       final ext = image.path.split('.').last;
       final ref = storage.ref().child(
           'images/${getConversationID(chatUserId)}/${DateTime.now().millisecondsSinceEpoch}.$ext');
-
+      gallaryCtr.changeUploadingState(true);
       await ref.putFile(image).then((p0) {
         log("Data Transfer: ${p0.bytesTransferred / 1000} kb");
       });
+      gallaryCtr.changeUploadingState(false);
 
       final imageUrl = await ref.getDownloadURL();
       await sendMessage(
@@ -506,13 +602,19 @@ class ChatService {
     }
   }
 
-  static Future<void> updateMessageStatus(Message message) async {
+  static Future<void> updateMessageStatus(
+    Message message,
+  ) async {
+    var c = Get.put(ContactScreenController());
+    resetUnreadCount(chatUserID: c.currentChatUserId.value);
     CollectionReference usersCollection = firestore.collection('users');
     QuerySnapshot querySnapshot =
         await usersCollection.where('id', isEqualTo: user.uid).get();
     DocumentSnapshot userDoc = querySnapshot.docs.first;
     bool isOnline = userDoc.get('is_online');
-    if (isOnline) {
+    bool isReadRecieptOn = userDoc.get("is_read_receipt_on");
+
+    if (isOnline && isReadRecieptOn) {
       firestore
           .collection('chats/${getConversationID(message.fromId)}/messages/')
           .doc(message.sent)
@@ -550,5 +652,67 @@ class ChatService {
     String minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
     String seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
+  }
+
+  static Future<void> isProfilePhotoVisibile(bool isVisible) async {
+    try {
+      CollectionReference<Map<String, dynamic>> users =
+          firestore.collection('users');
+
+      await users.doc(user.uid).update({'is_photo_on': isVisible});
+      print('Document updated successfully!');
+    } catch (error) {
+      print('Error updating document: $error');
+    }
+  }
+
+  static Future<void> isLastSeenVisible(bool isVisible) async {
+    try {
+      CollectionReference<Map<String, dynamic>> users =
+          firestore.collection('users');
+
+      await users.doc(user.uid).update({'is_last_seen_on': isVisible});
+      print('Document updated successfully!');
+    } catch (error) {
+      print('Error updating document: $error');
+    }
+  }
+
+  // static Future<void> isPinned(
+  //     bool isPinned, String chatuserId, String groupId) async {
+  //   if (chatuserId != '') {
+  //     try {
+  //       CollectionReference<Map<String, dynamic>> users =
+  //           firestore.collection('users');
+
+  //       await users.doc(chatuserId).update({'pinned': !isPinned});
+  //       print('Document updated successfully!');
+  //     } catch (error) {
+  //       print('Error updating document: $error');
+  //     }
+  //   }
+  //   if (groupId != '') {
+  //     try {
+  //       CollectionReference<Map<String, dynamic>> users =
+  //           firestore.collection('groups');
+
+  //       await users.doc(groupId).update({'pinned': !isPinned});
+  //       print('Document updated successfully!');
+  //     } catch (error) {
+  //       print('Error updating document: $error');
+  //     }
+  //   }
+  // }
+
+  static Future<void> isReadOn(bool isVisible) async {
+    try {
+      CollectionReference<Map<String, dynamic>> users =
+          firestore.collection('users');
+
+      await users.doc(user.uid).update({'is_read_receipt_on': isVisible});
+      print('Document updated successfully!');
+    } catch (error) {
+      print('Error updating document: $error');
+    }
   }
 }

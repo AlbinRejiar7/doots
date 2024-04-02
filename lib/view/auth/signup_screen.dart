@@ -156,6 +156,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const CustomTextWidget(text: 'Number'),
+                          kHeight(height * 0.01),
+                          CustomTextField(
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(),
+                              validator: (value) {
+                                if (value == null ||
+                                    value.isEmpty ||
+                                    value.length != 10) {
+                                  return "enter valid number";
+                                }
+                                return null;
+                              },
+                              controller: c.phoneController,
+                              hintText: "Enter Phone Number")
+                        ],
+                      ),
+                      kHeight(height * 0.01),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           const CustomTextWidget(text: 'Location'),
                           kHeight(height * 0.01),
                           CustomTextField(
@@ -190,8 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             gallaryCtr.selectedImage.value)
                                         .then((value) {
                                       c.changeLoadingState(false);
-                                      Get.snackbar(
-                                          "Successfully", "Registered");
+
                                       gallaryCtr.selectedImage.value = null;
                                       c.emailController.clear();
                                       c.userNameController.clear();

@@ -6,8 +6,8 @@ class ContactScreenController extends GetxController {
   TextEditingController emailCtr = TextEditingController();
   TextEditingController nameCtr = TextEditingController();
   RxList<ChatUser> selectedMembers = <ChatUser>[].obs;
-  var currentIndex = 0.obs;
   var noResultsFound = false.obs;
+  var currentChatUserId = ''.obs;
   RxList<ChatUser> firebaseContacts = <ChatUser>[].obs;
 
   void addFirebaseContactsTolist(List<ChatUser> users) {
@@ -62,9 +62,9 @@ class ContactScreenController extends GetxController {
     foundedUsers(firebaseContacts);
   }
 
-  void tappedIndex(int index) {
-    currentIndex(index);
-  }
+  // void tappedIndex(int index) {
+  //   currentIndex(index);
+  // }
 
   void runfilter(String query) {
     List<ChatUser> results = [];

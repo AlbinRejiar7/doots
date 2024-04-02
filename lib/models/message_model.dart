@@ -77,6 +77,6 @@ class Message {
         "isDownloading": isDownloading,
         "replyMessage": replyMessage,
         if (name != null) "name": name, // Updated field
-        "createdAt": Timestamp.now(),
+        "createdAt": FieldValue.serverTimestamp(),
       };
 }

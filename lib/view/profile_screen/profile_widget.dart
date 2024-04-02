@@ -70,8 +70,7 @@ class ProfileStackWidget extends StatelessWidget {
                                 onTap: () {
                                   Get.to(
                                       () => ProfileEditingPage(
-                                            currentUserId: myData!.id!,
-                                            imageUrl: myData!.image!,
+                                            chatUser: myData!,
                                           ),
                                       transition: Transition.downToUp);
                                 },

@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
-import 'package:doots/constants/color_constants.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
@@ -46,7 +45,9 @@ class ReplyWidget extends StatelessWidget {
                 : EdgeInsets.only(right: width * 0.4),
             padding: EdgeInsets.all(width * 0.02),
             decoration: BoxDecoration(
-              color: kgreen1.withOpacity(0.5),
+              color: isUser
+                  ? Theme.of(context).colorScheme.tertiary
+                  : Theme.of(context).colorScheme.tertiaryContainer,
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(width * 0.03),
                   topRight: Radius.circular(width * 0.03),

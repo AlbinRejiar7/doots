@@ -27,7 +27,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
     return Container(
       height: height * 0.08,
       width: width,
-      color: Theme.of(context).colorScheme.onPrimary,
+      // color: Theme.of(context).colorScheme.onPrimary,
+      decoration: BoxDecoration(
+          border: Border(
+              top: BorderSide(
+                  color: Theme.of(context).colorScheme.secondary, width: 0.1))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -83,6 +87,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 } else if (value == 2) {
                   Get.to(() => const ChangePasswordScreen());
                 } else if (value == 3) {
+                  await ChatService.updateActiveStatus(false);
                   await authCtr.signOut().then((value) {
                     Get.snackbar("Log out", 'Successfull');
                     Get.offAll(() => const ChoosingPage());

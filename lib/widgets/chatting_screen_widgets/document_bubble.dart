@@ -1,4 +1,3 @@
-import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/controller/downlod_controller.dart';
 import 'package:doots/models/message_model.dart';
@@ -45,129 +44,123 @@ class DocumentBubble extends StatelessWidget {
           },
           child: Column(
             children: [
-              Container(
-                padding: EdgeInsets.all(width * 0.02),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: kgreen1,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(width * 0.03),
-                      decoration: BoxDecoration(
-                          color:
-                              Theme.of(context).primaryColor.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(5)),
-                      child: Row(
-                        children: [
-                          if (isUser)
-                            Container(
-                              height: height * 0.04,
-                              width: height * 0.04,
-                              decoration: const BoxDecoration(
-                                  image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                          "assets/images/icons/document_icon.png"))),
-                            ),
-                          if (!isUser)
-                            message.isDownloaded
-                                ? Container(
-                                    height: height * 0.04,
-                                    width: height * 0.04,
-                                    decoration: const BoxDecoration(
-                                        image: DecorationImage(
-                                            fit: BoxFit.cover,
-                                            image: AssetImage(
-                                                "assets/images/icons/document_icon.png"))),
-                                  )
-                                : message.isDownloading
-                                    ? CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      )
-                                    : IconButton(
-                                        onPressed: () async {
-                                          try {
-                                            ChatService.updateDownloadingStatus(
-                                                message, true);
-                                            await downloadCtr
-                                                .downloadFileFromFirebase(
-                                                    message.msg,
-                                                    message.filename);
-                                            await ChatService
-                                                .updateDownloadedStatus(
-                                                    message, true);
-                                            await ChatService
-                                                .updateDownloadingStatus(
-                                                    message, false);
-                                          } on Exception catch (e) {
-                                            Get.snackbar("title", e.toString());
-                                          }
-                                        },
-                                        icon: const Icon(Icons.download)),
-                          kWidth(width * 0.02),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(message.filename,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium),
-                                Row(
-                                  children: [
-                                    Text(message.size,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium),
-                                    kWidth(width * 0.01),
-                                    Text("•",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium),
-                                    kWidth(width * 0.01),
-                                    Flexible(
-                                      child: Text(message.ext,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(width * 0.03),
+                    decoration: BoxDecoration(
+                        color: isUser
+                            ? Theme.of(context).colorScheme.tertiary
+                            : Theme.of(context).colorScheme.tertiaryContainer,
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Row(
                       children: [
-                        Text(sentTime,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(fontSize: 12)),
-                        if (message.read.isEmpty)
-                          isUser
-                              ? Icon(
-                                  size: width * 0.05,
-                                  Icons.done,
+                        if (isUser)
+                          Container(
+                            height: height * 0.04,
+                            width: height * 0.04,
+                            decoration: const BoxDecoration(
+                                image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: AssetImage(
+                                        "assets/images/icons/document_icon.png"))),
+                          ),
+                        if (!isUser)
+                          message.isDownloaded
+                              ? Container(
+                                  height: height * 0.04,
+                                  width: height * 0.04,
+                                  decoration: const BoxDecoration(
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: AssetImage(
+                                              "assets/images/icons/document_icon.png"))),
                                 )
-                              : SizedBox.fromSize(),
-                        if (message.read.isNotEmpty)
-                          isUser
-                              ? Icon(
-                                  size: width * 0.05,
-                                  Icons.done_all,
-                                  color: Colors.blue,
-                                )
-                              : SizedBox.fromSize(),
+                              : message.isDownloading
+                                  ? CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    )
+                                  : IconButton(
+                                      onPressed: () async {
+                                        try {
+                                          ChatService.updateDownloadingStatus(
+                                              message, true);
+                                          await downloadCtr
+                                              .downloadFileFromFirebase(
+                                                  message.msg,
+                                                  message.filename);
+                                          await ChatService
+                                              .updateDownloadedStatus(
+                                                  message, true);
+                                          await ChatService
+                                              .updateDownloadingStatus(
+                                                  message, false);
+                                        } on Exception catch (e) {
+                                          Get.snackbar("title", e.toString());
+                                        }
+                                      },
+                                      icon: const Icon(Icons.download)),
+                        kWidth(width * 0.02),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(message.filename,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
+                              Row(
+                                children: [
+                                  Text(message.size,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
+                                  kWidth(width * 0.01),
+                                  Text("•",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium),
+                                  kWidth(width * 0.01),
+                                  Flexible(
+                                    child: Text(message.ext,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(sentTime,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(fontSize: 12)),
+                      if (message.read.isEmpty)
+                        isUser
+                            ? Icon(
+                                size: width * 0.05,
+                                Icons.done,
+                              )
+                            : SizedBox.fromSize(),
+                      if (message.read.isNotEmpty)
+                        isUser
+                            ? Icon(
+                                size: width * 0.05,
+                                Icons.done_all,
+                                color: Colors.blue,
+                              )
+                            : SizedBox.fromSize(),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
