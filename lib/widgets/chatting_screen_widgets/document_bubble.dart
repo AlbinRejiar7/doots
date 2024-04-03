@@ -56,16 +56,7 @@ class DocumentBubble extends StatelessWidget {
                         borderRadius: BorderRadius.circular(5)),
                     child: Row(
                       children: [
-                        if (isUser)
-                          Container(
-                            height: height * 0.04,
-                            width: height * 0.04,
-                            decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: AssetImage(
-                                        "assets/images/icons/document_icon.png"))),
-                          ),
+                        if (isUser) DocIcon(height: height),
                         if (!isUser)
                           message.isDownloaded
                               ? Container(
@@ -166,6 +157,27 @@ class DocumentBubble extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class DocIcon extends StatelessWidget {
+  const DocIcon({
+    super.key,
+    required this.height,
+  });
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height * 0.04,
+      width: height * 0.04,
+      decoration: const BoxDecoration(
+          image: DecorationImage(
+              fit: BoxFit.cover,
+              image: AssetImage("assets/images/icons/document_icon.png"))),
     );
   }
 }

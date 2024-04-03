@@ -61,6 +61,14 @@ class ChatService {
         .snapshots();
   }
 
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getCommonGroups(
+      List<String> groupIds) {
+    return firestore
+        .collection('groups')
+        .where('groupId', whereIn: groupIds)
+        .snapshots();
+  }
+
   static Future<void> sendFirstMessage(
       String chatUserId, String msg, String type) async {
     await firestore
@@ -303,32 +311,6 @@ class ChatService {
     }
   }
 
-  static void removeMemberFromGroup(
-    String groupId,
-    String memberToRemove,
-    String adminId,
-  ) async {
-    if (memberToRemove == adminId) {
-      // Do not remove the admin
-      Fluttertoast.showToast(msg: 'Cannot remove admin from the group');
-      return;
-    }
-
-    DocumentReference groupRef =
-        FirebaseFirestore.instance.collection('groups').doc(groupId);
-
-    // Update the group to remove the member
-    await groupRef.update({
-      'membersId': FieldValue.arrayRemove([memberToRemove]),
-    }).then((_) {
-      print('Member removed successfully');
-      Fluttertoast.showToast(msg: 'Member removed successfully');
-    }).catchError((error) {
-      print('Failed to remove member: $error');
-      Fluttertoast.showToast(msg: 'Failed to remove member: $error');
-    });
-  }
-
   static void addNewMembersToGroup(
     String groupId,
     List<ChatUser> selectedMembersChatUser,
@@ -361,6 +343,15 @@ class ChatService {
     }).catchError((error) {
       print('Failed to add members: $error');
       Fluttertoast.showToast(msg: 'Failed to add members: $error');
+    });
+    selectedMembers.forEach((userID) async {
+      await firestore.collection("users").doc(userID).update({
+        "groupIds": FieldValue.arrayUnion([groupId])
+      }).then((_) {
+        print("Value added to array successfully");
+      }).catchError((error) {
+        print("Failed to add value to array: $error");
+      });
     });
   }
 
@@ -427,6 +418,16 @@ class ChatService {
           .doc(groupId)
           .set(groupChat.toJson())
           .then((value) => Fluttertoast.showToast(msg: "Group Created"));
+
+      members.forEach((userID) async {
+        await firestore.collection("users").doc(userID).update({
+          "groupIds": FieldValue.arrayUnion([groupId])
+        }).then((_) {
+          print("Value added to array successfully");
+        }).catchError((error) {
+          print("Failed to add value to array: $error");
+        });
+      });
     } on FirebaseException catch (e) {
       Fluttertoast.showToast(msg: e.message.toString());
     }

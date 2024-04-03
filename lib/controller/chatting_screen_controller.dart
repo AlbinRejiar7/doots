@@ -1,7 +1,9 @@
+import 'package:doots/constants/global.dart';
 import 'package:doots/controller/audio_controller.dart';
 import 'package:doots/models/chat_items.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/message_model.dart';
+import 'package:doots/service/chat_services.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -42,13 +44,6 @@ class ChattingScreenController extends GetxController {
       );
     }
   }
-
-  // void pinChat(String chatId) {
-  //   final index = foundedChatItem.indexWhere((chat) => chat.id == chatId);
-  //   final pinnedChat = foundedChatItem.removeAt(index);
-  //   foundedChatItem.insert(0, pinnedChat);
-
-  // }
 
   void runfilter(String query) {
     List<ChatItem> results = [];
@@ -131,13 +126,15 @@ class ChattingScreenController extends GetxController {
     //   pinnedChats(pinnedChatAsModel.toSet());
     // }
 
-    var pinnedChatsAsMap = data.read("pinnedchats");
+    if (authInstance.currentUser != null) {
+      var pinnedChatsAsMap = data.read(ChatService.user.uid);
 
-    if (pinnedChatsAsMap != null) {
-      List<ChatItem> pinnedChatAsModel = [
-        ...pinnedChatsAsMap.map((map) => ChatItem.fromJson(map)),
-      ];
-      pinnedChats(pinnedChatAsModel.toSet());
+      if (pinnedChatsAsMap != null) {
+        List<ChatItem> pinnedChatAsModel = [
+          ...pinnedChatsAsMap.map((map) => ChatItem.fromJson(map)),
+        ];
+        pinnedChats(pinnedChatAsModel.toSet());
+      }
     }
 
     focusNode = FocusNode();
@@ -157,21 +154,5 @@ class ChattingScreenController extends GetxController {
 
   void changeMicState(bool value) {
     isMic(value);
-  }
-
-  // Define a method to remove a chat from pinned chats in local storage
-  void removeChatFromLocalStorage(String chatId) {
-    List<Map<String, dynamic>> pinnedChats = data.read("pinnedchats") ?? [];
-
-    // Remove the chat with the specified ID from the list
-
-    // Update the local storage with the modified list
-    data.write("pinnedchats", pinnedChats);
-  }
-
-// Call this method when you want to remove a chat from pinned chats in local storage
-  void onRemoveChatFromLocalStorage(String chatId) {
-    removeChatFromLocalStorage(chatId);
-    // Optionally, update your UI or perform any other necessary tasks after removing the chat from local storage
   }
 }

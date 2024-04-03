@@ -95,7 +95,7 @@ class GroupChatScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          groupInfo!.groupName,
+                          groupInfo.groupName,
                           style: Theme.of(context)
                               .textTheme
                               .bodyLarge

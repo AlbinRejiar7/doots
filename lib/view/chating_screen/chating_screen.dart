@@ -51,11 +51,11 @@ class ChattingScreen extends StatelessWidget {
             visible: c.canScrollToOldest.value,
             child: FloatingActionButton(
                 backgroundColor: kgreen1,
-                child: Icon(Icons.arrow_downward),
                 shape: CircleBorder(),
                 onPressed: () {
                   c.scrollToOldest();
-                }),
+                },
+                child: Icon(Icons.arrow_downward)),
           ),
         );
       }),

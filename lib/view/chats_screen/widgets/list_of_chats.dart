@@ -118,7 +118,7 @@ class ListOfChats extends StatelessWidget {
                                                         chatItem.toMap())
                                                     .toList();
                                             localPinnedChats.write(
-                                                "pinnedchats", chatMaps);
+                                                ChatService.user.uid, chatMaps);
                                             chatsCtr.foundedChatItem
                                                 .removeWhere((chatItem) =>
                                                     chatsCtr.pinnedChats

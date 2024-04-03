@@ -136,7 +136,7 @@ class CreateNewGroup extends StatelessWidget {
                     itemCount: contactCtr.selectedMembers.length,
                     itemBuilder: (BuildContext context, int index) {
                       var revList =
-                          contactCtr.selectedMembers.reversed.toList();
+                          contactCtr.selectedMembers.toList().reversed.toList();
                       return Padding(
                         padding: EdgeInsets.symmetric(horizontal: width * 0.02),
                         child: SizedBox(

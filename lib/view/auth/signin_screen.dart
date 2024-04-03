@@ -1,6 +1,5 @@
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/auth_controller.dart';
-import 'package:doots/controller/profile_page_controller.dart';
 import 'package:doots/view/auth/signup_screen.dart';
 import 'package:doots/widgets/custom_auth_button.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
@@ -21,7 +20,7 @@ class SigninScreen extends StatefulWidget {
 class _SigninScreenState extends State<SigninScreen> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   var c = Get.put(AuthController());
-  var profileCtr = Get.put(ProfilePageController());
+
   @override
   Widget build(BuildContext context) {
     var width = context.width;

@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
+import 'package:doots/controller/details_screen_controller.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
@@ -20,9 +23,9 @@ class GroupDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var c = Get.put(ChattingScreenController());
+    var ctr = Get.put(GroupDetailsScreenController());
     var height = context.height;
     var width = context.width;
-    List<ChatUser> groupMembersInfo = [];
 
     return Scaffold(
       appBar: AppBar(
@@ -214,99 +217,147 @@ class GroupDetailsScreen extends StatelessWidget {
                       kHeight(height * 0.01),
                       StreamBuilder(
                           stream:
-                              ChatService.getAllUsers(groupChatInfo.membersId),
+                              ChatService.getGroupInfo(groupChatInfo.groupId),
                           builder: (context, snapshot) {
-                            var data = snapshot.data?.docs;
+                            var data = snapshot.data?.data();
+                            GroupChat groupChatdetails;
                             if (data != null) {
-                              groupMembersInfo.addAll(data
-                                      ?.map((e) => ChatUser.fromJson(e.data()))
-                                      .where((chatuser) =>
-                                          !groupMembersInfo.any(
-                                              (chat) => chat.id == chatuser.id))
-                                      .toList() ??
-                                  []);
-                            }
-                            if (groupMembersInfo.isNotEmpty) {
-                              return ListView.separated(
-                                physics: const NeverScrollableScrollPhysics(),
-                                separatorBuilder: (context, index) =>
-                                    const Divider(
-                                  thickness: 0.2,
-                                ),
-                                shrinkWrap: true,
-                                itemCount: groupMembersInfo.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return InkWell(
-                                    onTap: () {
-                                      Get.to(() => ChattingScreen(
-                                          chatUser: groupMembersInfo[index]));
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.all(width * 0.016),
-                                      child: Row(
-                                        children: [
-                                          CircleAvatar(
-                                            radius: width * 0.07,
-                                            backgroundImage:
-                                                CachedNetworkImageProvider(
-                                                    groupMembersInfo[index]
-                                                        .image!),
-                                          ),
-                                          kWidth(width * 0.03),
-                                          Text(groupMembersInfo[index].name!),
-                                          const Spacer(),
-                                          IconButton(
-                                              onPressed: () {
-                                                showDialog(
-                                                  context: context,
-                                                  builder: (context) =>
-                                                      AlertDialog(
-                                                    surfaceTintColor:
-                                                        Colors.transparent,
-                                                    backgroundColor: Theme.of(
-                                                            context)
-                                                        .scaffoldBackgroundColor,
-                                                    title: Text(
-                                                      "Do you want to remove this member ? ",
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyLarge,
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () async {
-                                                            ChatService.removeMemberFromGroup(
-                                                                groupChatInfo
-                                                                    .groupId,
-                                                                groupMembersInfo[
-                                                                        index]
-                                                                    .id!,
-                                                                groupChatInfo
-                                                                    .adminId);
-                                                          },
-                                                          child: Text("Yes")),
-                                                      TextButton(
-                                                          onPressed: () {
-                                                            Get.back();
-                                                          },
-                                                          child: Text("No"))
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                              icon: Icon(
-                                                Icons.delete,
-                                                color: Colors.red,
-                                              ))
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
+                              groupChatdetails = GroupChat.fromJson(data);
                             } else {
-                              return const Text("Loading...");
+                              return CircularProgressIndicator();
                             }
+
+                            return GetBuilder<GroupDetailsScreenController>(
+                                builder: (_) {
+                              return StreamBuilder(
+                                  stream: ChatService.getAllUsers(
+                                      groupChatdetails.membersId),
+                                  builder: (context, snapshot) {
+                                    var data = snapshot.data?.docs;
+                                    if (data != null) {
+                                      ctr.groupMembersInfo.addAll(data
+                                              ?.map((e) =>
+                                                  ChatUser.fromJson(e.data()))
+                                              .where((chatuser) => !ctr
+                                                  .groupMembersInfo
+                                                  .any((chat) =>
+                                                      chat.id == chatuser.id))
+                                              .toList() ??
+                                          []);
+                                    }
+                                    if (ctr.groupMembersInfo.isNotEmpty) {
+                                      return ListView.separated(
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        separatorBuilder: (context, index) =>
+                                            const Divider(
+                                          thickness: 0.2,
+                                        ),
+                                        shrinkWrap: true,
+                                        itemCount: ctr.groupMembersInfo.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return InkWell(
+                                            onTap: () {
+                                              Get.to(() => ChattingScreen(
+                                                  chatUser:
+                                                      ctr.groupMembersInfo[
+                                                          index]));
+                                            },
+                                            child: Padding(
+                                              padding:
+                                                  EdgeInsets.all(width * 0.016),
+                                              child: Row(
+                                                children: [
+                                                  CircleAvatar(
+                                                    radius: width * 0.07,
+                                                    backgroundImage:
+                                                        CachedNetworkImageProvider(
+                                                            ctr
+                                                                .groupMembersInfo[
+                                                                    index]
+                                                                .image!),
+                                                  ),
+                                                  kWidth(width * 0.03),
+                                                  Text(ctr
+                                                      .groupMembersInfo[index]
+                                                      .name!),
+                                                  const Spacer(),
+                                                  ctr.groupMembersInfo[index]
+                                                              .id ==
+                                                          groupChatdetails
+                                                              .adminId
+                                                      ? const IconButton(
+                                                          onPressed: null,
+                                                          icon: Icon(
+                                                            Icons
+                                                                .admin_panel_settings,
+                                                            color: kgreen1,
+                                                          ),
+                                                        )
+                                                      : IconButton(
+                                                          onPressed: () {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (context) =>
+                                                                      AlertDialog(
+                                                                surfaceTintColor:
+                                                                    Colors
+                                                                        .transparent,
+                                                                backgroundColor:
+                                                                    Theme.of(
+                                                                            context)
+                                                                        .scaffoldBackgroundColor,
+                                                                title: Text(
+                                                                  "Do you want to remove this member ? ",
+                                                                  style: Theme.of(
+                                                                          context)
+                                                                      .textTheme
+                                                                      .bodyLarge,
+                                                                ),
+                                                                actions: [
+                                                                  TextButton(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        ctr.removeMemberFromGroup(
+                                                                            groupChatInfo.groupId,
+                                                                            ctr.groupMembersInfo[index].id!,
+                                                                            groupChatInfo.adminId);
+                                                                        log(ctr
+                                                                            .groupMembersInfo
+                                                                            .toString());
+
+                                                                        Get.back();
+                                                                      },
+                                                                      child: Text(
+                                                                          "Yes")),
+                                                                  TextButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        Get.back();
+                                                                      },
+                                                                      child: Text(
+                                                                          "No"))
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                          icon: const Icon(
+                                                            Icons.delete,
+                                                            color: Colors.red,
+                                                          ))
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      return const Text("Loading...");
+                                    }
+                                  });
+                            });
                           }),
                     ],
                   ),

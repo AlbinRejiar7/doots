@@ -1,7 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/models/chat_user.dart';
+import 'package:doots/models/group_model.dart';
+import 'package:doots/service/chat_services.dart';
+import 'package:doots/view/chating_screen/widget/details_screen_widget/build_box.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
@@ -16,9 +20,9 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var c = Get.put(ChattingScreenController());
+    var docCtr = Get.put(DocumentController());
     var height = context.height;
     var width = context.width;
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -186,6 +190,68 @@ class DetailsScreen extends StatelessWidget {
                       Text("GROUP IN COMMON",
                           style: Theme.of(context).textTheme.bodyLarge),
                       kHeight(height * 0.01),
+                      StreamBuilder(
+                          stream: ChatService.getMyUserData(),
+                          builder: (context, snapshot) {
+                            var myData = snapshot.data;
+                            if (myData != null) {
+                              List<String> commonGroupsId = myData.groupIds
+                                  .toSet()
+                                  .intersection(chatUser.groupIds.toSet())
+                                  .toList();
+
+                              return StreamBuilder(
+                                  stream: ChatService.getCommonGroups(
+                                      commonGroupsId),
+                                  builder: (context, snapshot) {
+                                    List<GroupChat> groupsInfo = [];
+                                    if (snapshot.data != null) {
+                                      var data = snapshot.data;
+                                      if (data != null) {
+                                        var datas = data.docs;
+                                        groupsInfo = datas
+                                            .map((e) =>
+                                                GroupChat.fromJson(e.data()))
+                                            .toList();
+                                      }
+                                    } else {
+                                      return Text("loading..");
+                                    }
+
+                                    if (groupsInfo.isNotEmpty) {
+                                      return ListView.separated(
+                                        physics: NeverScrollableScrollPhysics(),
+                                        separatorBuilder: (context, index) =>
+                                            Divider(
+                                          thickness: 0.3,
+                                        ),
+                                        shrinkWrap: true,
+                                        itemCount: groupsInfo.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: width * 0.06,
+                                                backgroundImage:
+                                                    CachedNetworkImageProvider(
+                                                        groupsInfo[index]
+                                                            .photoUrl!),
+                                              ),
+                                              kWidth(width * 0.03),
+                                              Text(groupsInfo[index].groupName)
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      return Text("No Group in Common");
+                                    }
+                                  });
+                            }
+                            return Text("loading..");
+                          }),
+                      kHeight(height * 0.01),
                       Divider(
                         color: Theme.of(context).primaryColor,
                       ),
@@ -205,14 +271,27 @@ class DetailsScreen extends StatelessWidget {
                               ))
                         ],
                       ),
+                      GridView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            mainAxisSpacing: height * 0.02,
+                            crossAxisSpacing: width * 0.02),
+                        itemCount: c.chats.length > 12 ? 12 : c.chats.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          bool isUser =
+                              (c.chats[index].fromId == ChatService.user.uid);
+                          if (c.chats[index].messageType != "text") {
+                            return buildMessageWidget(
+                                c.chats[index], height, width, docCtr, isUser);
+                          }
+                          return null;
+                        },
+                      ),
                       kHeight(height * 0.01),
                       Divider(
                         color: Theme.of(context).primaryColor,
-                      ),
-                      kHeight(height * 0.01),
-                      Text(
-                        "ATTACHED FILES",
-                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ],
                   ),

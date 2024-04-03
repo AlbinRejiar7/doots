@@ -1,9 +1,3 @@
-import 'dart:convert';
-
-ChatUser chatUserFromJson(String str) => ChatUser.fromJson(json.decode(str));
-
-String chatUserToJson(ChatUser data) => json.encode(data.toJson());
-
 class ChatUser {
   String? id;
   String? name;
@@ -16,10 +10,11 @@ class ChatUser {
   String? lastActive;
   String? createdAt;
   String? phoneNumber;
-  bool? isPhotoOn; // New field added
-  bool? isLastSeenOn; // New field added
-  bool? isReadReceiptOn; // New field added
-  String nickName; // Updated field
+  bool? isPhotoOn;
+  bool? isLastSeenOn;
+  bool? isReadReceiptOn;
+  String nickName;
+  List<String> groupIds; // Updated field with an empty list as default
 
   ChatUser({
     this.id,
@@ -36,8 +31,10 @@ class ChatUser {
     this.isPhotoOn = true,
     this.isLastSeenOn = true,
     this.isReadReceiptOn = true,
-    this.nickName = '', // Initialize nickName with empty string
-  });
+    this.nickName = '',
+    List<String>? groupIds, // Updated to allow null input for groupIds
+  }) : groupIds = groupIds ??
+            []; // Initialize groupIds with an empty list if not provided
 
   factory ChatUser.fromJson(Map<String, dynamic> json) => ChatUser(
         id: json["id"],
@@ -54,8 +51,10 @@ class ChatUser {
         isPhotoOn: json["is_photo_on"],
         isLastSeenOn: json["is_last_seen_on"],
         isReadReceiptOn: json["is_read_receipt_on"],
-        nickName: json["nickName"] ??
-            '', // Parse nickName from the JSON, default to empty string
+        nickName: json["nickName"] ?? '',
+        groupIds: json["groupIds"] != null
+            ? List<String>.from(json["groupIds"])
+            : [], // Parse groupIds from the JSON or initialize with an empty list
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,6 +72,15 @@ class ChatUser {
         "is_photo_on": isPhotoOn,
         "is_last_seen_on": isLastSeenOn,
         "is_read_receipt_on": isReadReceiptOn,
-        "nickName": nickName, // Include nickName in the JSON
+        "nickName": nickName,
+        "groupIds": groupIds, // Include groupIds in the JSON
       };
+
+  // @override
+  // bool operator ==(Object other) =>
+  //     identical(this, other) ||
+  //     other is ChatUser && runtimeType == other.runtimeType && id == other.id;
+
+  // @override
+  // int get hashCode => id.hashCode;
 }

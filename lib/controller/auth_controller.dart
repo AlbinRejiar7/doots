@@ -86,6 +86,7 @@ class AuthController extends GetxController {
         imageUrl = await ref.getDownloadURL();
       }
       final chatUser = ChatUser(
+        groupIds: [],
         phoneNumber: phoneController.text,
         id: uid,
         name: userNameController.text,

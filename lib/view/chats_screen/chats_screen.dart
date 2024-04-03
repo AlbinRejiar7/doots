@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/controller/contact_screen_controller.dart';
+import 'package:doots/controller/profile_page_controller.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/chating_screen/chating_screen.dart';
@@ -25,6 +26,7 @@ class ChatsScreen extends StatefulWidget {
 class _ChatsScreenState extends State<ChatsScreen> {
   @override
   Widget build(BuildContext context) {
+    Get.put(ProfilePageController());
     var chatCtr = Get.put(ChattingScreenController());
     var height = context.height;
     var width = context.width;
@@ -101,7 +103,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
                       List<Map<String, dynamic>> chatMaps = chatCtr.pinnedChats
                           .map((chatItem) => chatItem.toMap())
                           .toList();
-                      data.write("pinnedchats", chatMaps);
+                      data.write(ChatService.user.uid, chatMaps);
                     },
                     trailing: Column(
                       mainAxisSize: MainAxisSize.min,
