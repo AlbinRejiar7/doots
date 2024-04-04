@@ -58,7 +58,7 @@ class ListOfChats extends StatelessWidget {
                   chatsCtr.allChats.addAll(data
                       .map((e) => ChatItem(
                           id: e.get("id"),
-                          name: e.get("name"),
+                          name: e.get("nickName"),
                           type: 'user',
                           imageUrl: e.get('is_photo_on') as bool
                               ? e.get('image')

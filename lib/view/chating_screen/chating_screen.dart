@@ -96,7 +96,9 @@ class ChattingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          list.isNotEmpty ? list[0].name! : chatUser.name!,
+                          list.isNotEmpty
+                              ? list[0].nickName!
+                              : chatUser.nickName!,
                           style: Theme.of(context)
                               .textTheme
                               .bodyLarge
@@ -250,9 +252,7 @@ class ChattingScreen extends StatelessWidget {
                     )
                   : const SizedBox.shrink();
             }),
-            ReplyMessageWidget(
-              chatUser: chatUser,
-            ),
+            ReplyMessageWidget(),
             Container(
                 decoration: BoxDecoration(
                     color: Theme.of(context).scaffoldBackgroundColor,
@@ -385,26 +385,23 @@ class ChattingScreen extends StatelessWidget {
 }
 
 class ReplyMessageWidget extends StatelessWidget {
-  final ChatUser chatUser;
   const ReplyMessageWidget({
     super.key,
-    required this.chatUser,
   });
 
   @override
   Widget build(BuildContext context) {
-    var ctr = Get.put(ChattingScreenController());
     var height = Get.height;
     var width = Get.width;
 
-    return Obx(() {
-      var message = ctr.chosenReplyMessage.value;
+    return GetBuilder<ChattingScreenController>(builder: (_) {
+      var message = _.chosenReplyMessage.value;
       bool isUser = (message.fromId == ChatService.user.uid);
       return AnimatedContainer(
         padding: EdgeInsets.all(width * 0.01),
         duration: const Duration(milliseconds: 200),
         curve: Curves.linear,
-        height: ctr.isReply.value ? (height * 0.07) : 0.0,
+        height: _.isReply.value ? (height * 0.07) : 0.0,
         child: Row(
           children: [
             Container(
@@ -417,29 +414,21 @@ class ReplyMessageWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Obx(() {
-                      var message = ctr.chosenReplyMessage.value;
-                      bool isUser = (message.fromId == ChatService.user.uid);
-                      return Text(
-                        isUser ? "You" : chatUser.name!,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      );
-                    }),
-                  ),
+                      child: Text(
+                    isUser ? "You" : message.name ?? "null",
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  )),
                   Expanded(
-                    child: Obx(() {
-                      return Text(
-                        ctr.chosenReplyMessage.value.msg,
-                        overflow: TextOverflow.ellipsis,
-                      );
-                    }),
-                  ),
+                      child: Text(
+                    _.chosenReplyMessage.value.msg,
+                    overflow: TextOverflow.ellipsis,
+                  )),
                 ],
               ),
             ),
             CloseButton(
               onPressed: () {
-                ctr.isReplyWidgetOn(false);
+                _.isReplyWidgetOn(false);
               },
             )
           ],

@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/color_constants.dart';
-import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
-import 'package:doots/view/chating_screen/widget/details_screen_widget/build_box.dart';
+import 'package:doots/view/chating_screen/media_show_all_screen.dart';
+import 'package:doots/view/chating_screen/widget/details_screen_widget/media_grid_view_widget.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
@@ -20,7 +21,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var c = Get.put(ChattingScreenController());
-    var docCtr = Get.put(DocumentController());
+
     var height = context.height;
     var width = context.width;
     return Scaffold(
@@ -55,22 +56,7 @@ class DetailsScreen extends StatelessWidget {
                     padding: EdgeInsets.all(width * 0.04),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          chatUser.name.toString(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(
-                                  shadows: [
-                                const Shadow(
-                                    color: Colors.black, blurRadius: 20)
-                              ],
-                                  color: kWhite,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 30),
-                        ),
-                      ],
+                      children: [getNickName(true)],
                     ),
                   ),
                 ],
@@ -146,6 +132,7 @@ class DetailsScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: CustomTextField(
+                                  controller: c.nickNameCtr,
                                   hintText: "Enter name",
                                   isBoarder: false,
                                   fillColor: Theme.of(context).primaryColor,
@@ -154,7 +141,12 @@ class DetailsScreen extends StatelessWidget {
                               ),
                               kWidth(width * 0.01),
                               ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    ChatService.changeNickNameOfOtherUser(
+                                        chatUser, c.nickNameCtr.text);
+                                    c.nickNameCtr.clear();
+                                    c.changeEditingState();
+                                  },
                                   icon: const Icon(
                                     Icons.save_alt,
                                     color: kgreen1,
@@ -167,12 +159,7 @@ class DetailsScreen extends StatelessWidget {
                         );
                       }),
                       kHeight(height * 0.01),
-                      Text(
-                        chatUser.name.toString(),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary),
-                      ),
+                      getNickName(false),
                       kHeight(height * 0.01),
                       Text("Email",
                           style: Theme.of(context).textTheme.bodyLarge),
@@ -191,19 +178,39 @@ class DetailsScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyLarge),
                       kHeight(height * 0.01),
                       StreamBuilder(
-                          stream: ChatService.getMyUserData(),
-                          builder: (context, snapshot) {
-                            var myData = snapshot.data;
-                            if (myData != null) {
-                              List<String> commonGroupsId = myData.groupIds
-                                  .toSet()
-                                  .intersection(chatUser.groupIds.toSet())
-                                  .toList();
-
-                              return StreamBuilder(
+                        stream: ChatService.getMyUserData(),
+                        builder: (context, snapshot) {
+                          var myData = snapshot.data;
+                          if (myData != null) {
+                            return StreamBuilder(
+                              stream: ChatService.getUserInfo(chatUser),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text("Loading...");
+                                }
+                                var data = snapshot.data?.docs;
+                                List<String> commonGroupsId = [];
+                                if (data != null) {
+                                  List<ChatUser> otherUser = data
+                                      .map((e) => ChatUser.fromJson(e.data()))
+                                      .toList();
+                                  commonGroupsId = myData.groupIds
+                                      .toSet()
+                                      .intersection(
+                                          otherUser[0].groupIds.toSet())
+                                      .toList();
+                                } else {
+                                  return Text("No data available");
+                                }
+                                return StreamBuilder(
                                   stream: ChatService.getCommonGroups(
                                       commonGroupsId),
                                   builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text("Loading...");
+                                    }
                                     List<GroupChat> groupsInfo = [];
                                     if (snapshot.data != null) {
                                       var data = snapshot.data;
@@ -215,7 +222,7 @@ class DetailsScreen extends StatelessWidget {
                                             .toList();
                                       }
                                     } else {
-                                      return Text("loading..");
+                                      return Text("No data available");
                                     }
 
                                     if (groupsInfo.isNotEmpty) {
@@ -235,11 +242,11 @@ class DetailsScreen extends StatelessWidget {
                                                 radius: width * 0.06,
                                                 backgroundImage:
                                                     CachedNetworkImageProvider(
-                                                        groupsInfo[index]
-                                                            .photoUrl!),
+                                                  groupsInfo[index].photoUrl!,
+                                                ),
                                               ),
                                               kWidth(width * 0.03),
-                                              Text(groupsInfo[index].groupName)
+                                              Text(groupsInfo[index].groupName),
                                             ],
                                           );
                                         },
@@ -247,10 +254,14 @@ class DetailsScreen extends StatelessWidget {
                                     } else {
                                       return Text("No Group in Common");
                                     }
-                                  });
-                            }
-                            return Text("loading..");
-                          }),
+                                  },
+                                );
+                              },
+                            );
+                          }
+                          return Text("Loading...");
+                        },
+                      ),
                       kHeight(height * 0.01),
                       Divider(
                         color: Theme.of(context).primaryColor,
@@ -264,30 +275,17 @@ class DetailsScreen extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Get.to(() => ShowAllMediaScreen());
+                              },
                               child: const Text(
                                 "Show all",
                                 style: TextStyle(color: kgreen1),
                               ))
                         ],
                       ),
-                      GridView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: height * 0.02,
-                            crossAxisSpacing: width * 0.02),
-                        itemCount: c.chats.length > 12 ? 12 : c.chats.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          bool isUser =
-                              (c.chats[index].fromId == ChatService.user.uid);
-                          if (c.chats[index].messageType != "text") {
-                            return buildMessageWidget(
-                                c.chats[index], height, width, docCtr, isUser);
-                          }
-                          return null;
-                        },
+                      MediaGridViewWidget(
+                        isFullScreen: false,
                       ),
                       kHeight(height * 0.01),
                       Divider(
@@ -302,5 +300,41 @@ class DetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  StreamBuilder<QuerySnapshot<Map<String, dynamic>>> getNickName(
+      bool isAppbarText) {
+    return StreamBuilder(
+        stream: ChatService.getUserInfo(chatUser),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Text("Loading...");
+          }
+
+          if (snapshot.hasData) {
+            var data = snapshot.data!.docs;
+            var nickName = data[0].data()["nickName"];
+
+            return isAppbarText
+                ? Text(
+                    nickName.toString(),
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        shadows: [
+                          const Shadow(color: Colors.black, blurRadius: 20)
+                        ],
+                        color: kWhite,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30),
+                  )
+                : Text(
+                    nickName.toString(),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary),
+                  );
+          } else {
+            return Text("loading");
+          }
+        });
   }
 }

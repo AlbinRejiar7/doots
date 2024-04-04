@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
-import 'package:doots/controller/downlod_controller.dart';
+import 'package:doots/controller/download_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view_gallery.dart';

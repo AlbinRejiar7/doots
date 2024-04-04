@@ -1,5 +1,5 @@
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
-import 'package:doots/controller/downlod_controller.dart';
+import 'package:doots/controller/download_controller.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
@@ -9,10 +9,11 @@ import 'package:get_storage/get_storage.dart';
 
 class DocumentBubble extends StatelessWidget {
   final Message message;
-
+  final String? groupId;
   const DocumentBubble({
     super.key,
     required this.message,
+    this.groupId,
   });
 
   @override
@@ -30,6 +31,22 @@ class DocumentBubble extends StatelessWidget {
     }
     String sentTime =
         ChatService.convertTimestampTo12HrTime(int.parse(message.sent));
+    Future<void> downloadDocument() async {
+      if (groupId != null) {
+        ChatService.updateDownloadingStatusForGroup(message, true, groupId!);
+        await downloadCtr.downloadFileFromFirebase(
+            message.msg, message.filename);
+        ChatService.updateDownloadedStatusForGroup(message, true, groupId!);
+        ChatService.updateDownloadingStatusForGroup(message, false, groupId!);
+      } else {
+        ChatService.updateDownloadingStatus(message, true);
+        await downloadCtr.downloadAudioFromFirebase(
+            message.msg, message.filename);
+        ChatService.updateDownloadedStatus(message, true);
+        ChatService.updateDownloadingStatus(message, false);
+      }
+    }
+
     return Padding(
       padding: EdgeInsets.all(width * 0.02),
       child: Container(
@@ -73,24 +90,7 @@ class DocumentBubble extends StatelessWidget {
                                       strokeWidth: 2,
                                     )
                                   : IconButton(
-                                      onPressed: () async {
-                                        try {
-                                          ChatService.updateDownloadingStatus(
-                                              message, true);
-                                          await downloadCtr
-                                              .downloadFileFromFirebase(
-                                                  message.msg,
-                                                  message.filename);
-                                          await ChatService
-                                              .updateDownloadedStatus(
-                                                  message, true);
-                                          await ChatService
-                                              .updateDownloadingStatus(
-                                                  message, false);
-                                        } on Exception catch (e) {
-                                          Get.snackbar("title", e.toString());
-                                        }
-                                      },
+                                      onPressed: downloadDocument,
                                       icon: const Icon(Icons.download)),
                         kWidth(width * 0.02),
                         Expanded(

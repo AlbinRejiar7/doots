@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/global.dart';
 import 'package:doots/controller/audio_controller.dart';
 import 'package:doots/models/chat_items.dart';
@@ -10,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ChattingScreenController extends GetxController {
+  var otherChatUserData = ChatUser(nickName: "", groupIds: []).obs;
   Rx<String?> pinnedChatId = null.obs;
   late List<ChatItem> localChats;
   var data = GetStorage();
@@ -22,6 +24,7 @@ class ChattingScreenController extends GetxController {
   late FocusNode focusNode;
   var scrollController = ScrollController();
   var canScrollToOldest = false.obs;
+  TextEditingController nickNameCtr = TextEditingController();
   TextEditingController groupNameCtr = TextEditingController();
   TextEditingController descriptionCtr = TextEditingController();
   List<Message> chats = [];
@@ -33,6 +36,12 @@ class ChattingScreenController extends GetxController {
         curve: Curves.easeIn,
       );
     }
+  }
+
+  void fetchDataOfOtherUser(String otheruserId) async {
+    DocumentSnapshot<Map<String, dynamic>> otherUserData =
+        await ChatService.firestore.collection("users").doc(otheruserId).get();
+    otherChatUserData!.value = ChatUser.fromJson(otherUserData.data()!);
   }
 
   void scrollToLatest() {

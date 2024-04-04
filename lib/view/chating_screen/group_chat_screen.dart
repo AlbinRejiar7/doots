@@ -8,6 +8,7 @@ import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
+import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:doots/view/chating_screen/group_details_screen.dart';
 import 'package:doots/widgets/chatting_screen_widgets/audio_player_widget.dart';
 import 'package:doots/widgets/chatting_screen_widgets/chat_bubble.dart';
@@ -192,13 +193,17 @@ class GroupChatScreen extends StatelessWidget {
                               );
                             } else if (c.chats[index].messageType ==
                                 'document') {
-                              return DocumentBubble(message: c.chats[index]);
+                              return DocumentBubble(
+                                  groupId: groupInfo.groupId,
+                                  message: c.chats[index]);
                             } else if (c.chats[index].messageType == 'video') {
                               return VideoBubble(
+                                groupId: groupInfo.groupId,
                                 message: c.chats[index],
                               );
                             } else if (c.chats[index].messageType == 'audio') {
                               return AudioPlayerWidget(
+                                groupId: groupInfo.groupId,
                                 message: c.chats[index],
                               );
                             } else if (c.chats[index].messageType == 'reply') {
@@ -223,9 +228,7 @@ class GroupChatScreen extends StatelessWidget {
                     )
                   : const SizedBox.shrink();
             }),
-            // ReplyMessageWidget(
-            //   chatUser: chatUser,
-            // ),
+            ReplyMessageWidget(),
             Container(
                 decoration: BoxDecoration(
                     color: Theme.of(context).scaffoldBackgroundColor,

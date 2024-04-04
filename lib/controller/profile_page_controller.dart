@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/global.dart';
 import 'package:doots/models/chat_user.dart';
@@ -22,6 +24,7 @@ class ProfilePageController extends GetxController {
           .get();
       currentUserData =
           ChatUser.fromJson(userDoc.data() as Map<String, dynamic>);
+      log(currentUserData!.nickName.toString());
     } on FirebaseException catch (e) {
       Get.snackbar("title", e.message.toString());
     }

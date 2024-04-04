@@ -57,11 +57,11 @@ class MicAndSendButtonWidget extends StatelessWidget {
         } else {
           if (groupId.isNotEmpty && c.chatCtr.text.isNotEmpty) {
             ChatService.sendMessage(
-                chatUserId: chatUserId,
-                groupId: groupId,
-                msg: c.chatCtr.text,
-                type: 'text',
-                name: ChatService.user.displayName ?? "null");
+              chatUserId: chatUserId,
+              groupId: groupId,
+              msg: c.chatCtr.text,
+              type: 'text',
+            );
             c.chatCtr.clear();
             ChatService.updateIsTypingStatusOfGroup(groupId, false);
             c.changeMicState(true);

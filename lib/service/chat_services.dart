@@ -7,6 +7,7 @@ import 'package:doots/constants/global.dart';
 import 'package:doots/controller/bottom_sheet_controller/gallery_controller.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/controller/contact_screen_controller.dart';
+import 'package:doots/controller/profile_page_controller.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/models/message_model.dart';
@@ -192,8 +193,11 @@ class ChatService {
     String? name,
   }) async {
     var c = Get.put(ChattingScreenController());
+    var proCtr = Get.put(ProfilePageController());
+    proCtr.fetchUserData();
     if (chatUserId.isNotEmpty) {
       final Message individualMessage = Message(
+          name: proCtr.currentUserData!.nickName,
           replyMessage: replyMessage ?? '',
           duration: duration ?? "",
           localThumbnailPath: localThumbnailPath ?? "",
@@ -226,7 +230,7 @@ class ChatService {
       );
     } else if (groupId.isNotEmpty) {
       final Message groupMessage = Message(
-          name: name,
+          name: proCtr.currentUserData!.nickName,
           replyMessage: replyMessage ?? '',
           duration: duration ?? "",
           localThumbnailPath: localThumbnailPath ?? "",
@@ -385,6 +389,15 @@ class ChatService {
       log('Error deleting file: ${e.message}');
       // Handle any errors that occur during the deletion process
     }
+  }
+
+  static Future<void> changeNickNameOfOtherUser(
+      ChatUser chatUser, String newNickName) async {
+    firestore
+        .collection('users')
+        .doc(chatUser.id)
+        .update({'nickName': newNickName}).then(
+            (value) => Fluttertoast.showToast(msg: "Updated Successfully"));
   }
 
   static Future<void> createGroup(
@@ -629,6 +642,22 @@ class ChatService {
         .collection('chats/${getConversationID(message.fromId)}/messages/')
         .doc(message.sent)
         .update({'isDownloading': isDownloading});
+  }
+
+  static Future<void> updateDownloadingStatusForGroup(
+      Message message, bool isDownloading, String groupId) async {
+    firestore
+        .collection('groups/$groupId/messages/')
+        .doc(message.sent)
+        .update({'isDownloading': isDownloading});
+  }
+
+  static Future<void> updateDownloadedStatusForGroup(
+      Message message, bool isDownloaded, String groupId) async {
+    firestore
+        .collection('groups/$groupId/messages/')
+        .doc(message.sent)
+        .update({'isDownloaded': isDownloaded});
   }
 
   static Future<void> updateDownloadedStatus(

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/view/chating_screen/widget/details_screen_widget/photo_box.dart';
@@ -11,6 +13,7 @@ import 'video_box.dart';
 
 Widget buildMessageWidget(Message message, var height, var width,
     DocumentController docCtr, bool isUser) {
+  log(message.msg);
   switch (message.messageType) {
     case 'image':
       return photoBox(height, message);

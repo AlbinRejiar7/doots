@@ -1,6 +1,8 @@
+import 'dart:developer';
+
 import 'package:audioplayers/audioplayers.dart' as voice;
 import 'package:doots/constants/color_constants.dart';
-import 'package:doots/controller/downlod_controller.dart';
+import 'package:doots/controller/download_controller.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +11,11 @@ import 'package:get_storage/get_storage.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final Message message;
+  final String? groupId;
   const AudioPlayerWidget({
     super.key,
     required this.message,
+    this.groupId,
   });
 
   @override
@@ -72,11 +76,22 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   var downloadCtr = Get.put(DownloadController());
   Future<void> downloadVoice() async {
-    ChatService.updateDownloadingStatus(widget.message, true);
-    await downloadCtr.downloadAudioFromFirebase(
-        widget.message.msg, widget.message.filename);
-    ChatService.updateDownloadedStatus(widget.message, true);
-    ChatService.updateDownloadingStatus(widget.message, false);
+    if (widget.groupId != null) {
+      ChatService.updateDownloadingStatusForGroup(
+          widget.message, true, widget.groupId!);
+      await downloadCtr.downloadAudioFromFirebase(
+          widget.message.msg, widget.message.filename);
+      ChatService.updateDownloadedStatusForGroup(
+          widget.message, true, widget.groupId!);
+      ChatService.updateDownloadingStatusForGroup(
+          widget.message, false, widget.groupId!);
+    } else {
+      ChatService.updateDownloadingStatus(widget.message, true);
+      await downloadCtr.downloadAudioFromFirebase(
+          widget.message.msg, widget.message.filename);
+      ChatService.updateDownloadedStatus(widget.message, true);
+      ChatService.updateDownloadingStatus(widget.message, false);
+    }
   }
 
   Widget slider() {
@@ -169,6 +184,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                           )
                         : IconButton(
                             onPressed: () async {
+                              log("donwloaded enter");
                               await downloadVoice();
                             },
                             icon: Icon(Icons.download))

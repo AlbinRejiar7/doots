@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doots/constants/color_constants.dart';
-import 'package:doots/controller/downlod_controller.dart';
+import 'package:doots/controller/download_controller.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/widgets/video_widget.dart';
@@ -10,9 +10,11 @@ import 'package:get/get.dart';
 
 class VideoBubble extends StatelessWidget {
   final Message message;
+  final String? groupId;
   const VideoBubble({
     super.key,
     required this.message,
+    this.groupId,
   });
 
   @override
@@ -27,6 +29,20 @@ class VideoBubble extends StatelessWidget {
     if (!isUser && message.read.isEmpty) {
       ChatService.updateMessageStatus(message);
     }
+    Future<void> downloadVideo() async {
+      if (groupId != null) {
+        ChatService.updateDownloadingStatusForGroup(message, true, groupId!);
+        await c.downloadVideoFromFirebase(message.msg, message.filename);
+        ChatService.updateDownloadedStatusForGroup(message, true, groupId!);
+        ChatService.updateDownloadingStatusForGroup(message, false, groupId!);
+      } else {
+        ChatService.updateDownloadingStatus(message, true);
+        await c.downloadVideoFromFirebase(message.msg, message.filename);
+        ChatService.updateDownloadedStatus(message, true);
+        ChatService.updateDownloadingStatus(message, false);
+      }
+    }
+
     return GestureDetector(
       onTap: () {
         if (isUser) {
@@ -120,14 +136,7 @@ class VideoBubble extends StatelessWidget {
                                 bottom: 1,
                                 child: IconButton(
                                     onPressed: () async {
-                                      ChatService.updateDownloadingStatus(
-                                          message, true);
-                                      await c.downloadVideoFromFirebase(
-                                          message.msg, message.filename);
-                                      ChatService.updateDownloadingStatus(
-                                          message, false);
-                                      ChatService.updateDownloadedStatus(
-                                          message, true);
+                                      downloadVideo();
                                     },
                                     icon: CircleAvatar(
                                         radius: width * 0.04,

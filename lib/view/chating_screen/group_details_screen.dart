@@ -8,6 +8,8 @@ import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/chating_screen/chating_screen.dart';
+import 'package:doots/view/chating_screen/media_show_all_screen.dart';
+import 'package:doots/view/chating_screen/widget/details_screen_widget/media_grid_view_widget.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
 import 'package:doots/view/chats_screen/select_group_members.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
@@ -359,6 +361,31 @@ class GroupDetailsScreen extends StatelessWidget {
                                   });
                             });
                           }),
+                      kHeight(height * 0.01),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "MEDIAS",
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                Get.to(() => ShowAllMediaScreen());
+                              },
+                              child: const Text(
+                                "Show all",
+                                style: TextStyle(color: kgreen1),
+                              ))
+                        ],
+                      ),
+                      MediaGridViewWidget(
+                        isFullScreen: false,
+                      ),
+                      kHeight(height * 0.01),
+                      Divider(
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ],
                   ),
                 ],
