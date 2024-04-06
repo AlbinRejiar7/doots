@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
+import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:doots/view/chating_screen/media_show_all_screen.dart';
 import 'package:doots/view/chating_screen/widget/details_screen_widget/media_grid_view_widget.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
@@ -56,7 +56,19 @@ class DetailsScreen extends StatelessWidget {
                     padding: EdgeInsets.all(width * 0.04),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [getNickName(true)],
+                      children: [
+                        streamForNickName(
+                          chatUser,
+                          Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              shadows: [
+                                const Shadow(
+                                    color: Colors.black, blurRadius: 20)
+                              ],
+                              color: kWhite,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30),
+                        )
+                      ],
                     ),
                   ),
                 ],
@@ -142,8 +154,9 @@ class DetailsScreen extends StatelessWidget {
                               kWidth(width * 0.01),
                               ElevatedButton.icon(
                                   onPressed: () {
-                                    ChatService.changeNickNameOfOtherUser(
+                                    ChatService.setNickName(
                                         chatUser, c.nickNameCtr.text);
+                                    c.update();
                                     c.nickNameCtr.clear();
                                     c.changeEditingState();
                                   },
@@ -159,7 +172,12 @@ class DetailsScreen extends StatelessWidget {
                         );
                       }),
                       kHeight(height * 0.01),
-                      getNickName(false),
+                      streamForNickName(
+                        chatUser,
+                        Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary),
+                      ),
                       kHeight(height * 0.01),
                       Text("Email",
                           style: Theme.of(context).textTheme.bodyLarge),
@@ -314,39 +332,39 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  StreamBuilder<QuerySnapshot<Map<String, dynamic>>> getNickName(
-      bool isAppbarText) {
-    return StreamBuilder(
-        stream: ChatService.getUserInfo(chatUser),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Text("Loading...");
-          }
+  // StreamBuilder<QuerySnapshot<Map<String, dynamic>>> getNickName(
+  //     bool isAppbarText) {
+  //   return StreamBuilder(
+  //       stream: ChatService.getUserInfo(chatUser),
+  //       builder: (context, snapshot) {
+  //         if (!snapshot.hasData) {
+  //           return Text("Loading...");
+  //         }
 
-          if (snapshot.hasData) {
-            var data = snapshot.data!.docs;
-            var nickName = data[0].data()["nickName"];
+  //         if (snapshot.hasData) {
+  //           var data = snapshot.data!.docs;
+  //           var nickName = data[0].data()["nickName"];
 
-            return isAppbarText
-                ? Text(
-                    nickName.toString(),
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        shadows: [
-                          const Shadow(color: Colors.black, blurRadius: 20)
-                        ],
-                        color: kWhite,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30),
-                  )
-                : Text(
-                    nickName.toString(),
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary),
-                  );
-          } else {
-            return Text("loading");
-          }
-        });
-  }
+  //           return isAppbarText
+  // //               ? Text(
+  // //                   nickName.toString(),
+  //                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+  //                       shadows: [
+  //                         const Shadow(color: Colors.black, blurRadius: 20)
+  //                       ],
+  //                       color: kWhite,
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: 30),
+  //                  )
+  // //               : Text(
+  // //                   nickName.toString(),
+  //                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+  //                       fontWeight: FontWeight.bold,
+  //                       color: Theme.of(context).colorScheme.primary),
+  //                 );
+  // //         } else {
+  // //           return Text("loading");
+  // //         }
+  // //       });
+  // // }
 }

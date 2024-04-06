@@ -710,31 +710,68 @@ class ChatService {
     }
   }
 
-  // static Future<void> isPinned(
-  //     bool isPinned, String chatuserId, String groupId) async {
-  //   if (chatuserId != '') {
-  //     try {
-  //       CollectionReference<Map<String, dynamic>> users =
-  //           firestore.collection('users');
+  static Future<void> setNickName(ChatUser chatUser, String nickName) async {
+    try {
+      CollectionReference<Map<String, dynamic>> chats =
+          firestore.collection('chats');
+      String conversationID = getConversationID(chatUser.id!);
+      Map<String, dynamic> data = {"nickName${chatUser.id}": nickName};
 
-  //       await users.doc(chatuserId).update({'pinned': !isPinned});
-  //       print('Document updated successfully!');
-  //     } catch (error) {
-  //       print('Error updating document: $error');
-  //     }
-  //   }
-  //   if (groupId != '') {
-  //     try {
-  //       CollectionReference<Map<String, dynamic>> users =
-  //           firestore.collection('groups');
+      DocumentReference<Map<String, dynamic>> docRef =
+          chats.doc(conversationID);
+      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
 
-  //       await users.doc(groupId).update({'pinned': !isPinned});
-  //       print('Document updated successfully!');
-  //     } catch (error) {
-  //       print('Error updating document: $error');
-  //     }
-  //   }
-  // }
+      // Check if the field exists
+      if (docSnapshot.exists &&
+          docSnapshot.data()!.containsKey("nickName${chatUser.id}")) {
+        // Field exists, update it
+        await docRef.update(data);
+        log('Field updated successfully.');
+      } else {
+        // Field doesn't exist, create it
+        await docRef.set(
+            data,
+            SetOptions(
+                merge:
+                    true)); // Use merge: true to merge if document already exists
+        log('Field created successfully.');
+      }
+    } on FirebaseException catch (e) {
+      Fluttertoast.showToast(msg: e.message.toString());
+    }
+  }
+
+  static Future<String?> getNickName(String chatUserId) async {
+    try {
+      CollectionReference<Map<String, dynamic>> chats =
+          firestore.collection('chats');
+      String conversationID = getConversationID(chatUserId);
+
+      DocumentReference<Map<String, dynamic>> docRef =
+          chats.doc(conversationID);
+      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
+      if (docSnapshot.exists &&
+          docSnapshot.data()!.containsKey("nickName${chatUserId}")) {
+        String? nickName = docSnapshot.get('nickName${chatUserId}') as String;
+        log(nickName.toString() + "This is my nickname");
+        return nickName;
+      }
+    } on FirebaseException catch (e) {
+      Fluttertoast.showToast(msg: e.message.toString());
+    }
+    return null;
+  }
+
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getNicknameStream(
+      String chatUserId) {
+    String conversationID = getConversationID(chatUserId);
+    return firestore
+        .collection("chats")
+        .doc(conversationID)
+        .snapshots()
+        .first
+        .asStream();
+  }
 
   static Future<void> isReadOn(bool isVisible) async {
     try {

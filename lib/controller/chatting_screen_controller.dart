@@ -126,25 +126,22 @@ class ChattingScreenController extends GetxController {
 
     foundedChatItem(allChats);
 
-    // var pinnedChatsAsMap1 = data.read("pinnedchats");
-
-    // if (pinnedChatsAsMap1 == null) {
-    //   List<ChatItem> pinnedChatAsModel = [];
-    //   pinnedChatAsModel = pinnedChatsAsMap1
-    //       .cast<Map<String, dynamic>>()
-    //       .map((map) => ChatItem.fromJson(map))
-    //       .toList();
-    //   pinnedChats(pinnedChatAsModel.toSet());
-    // }
-
     if (authInstance.currentUser != null) {
       var pinnedChatsAsMap = data.read(ChatService.user.uid);
-
+      var archivedChatsAsMap = data.read("archive${ChatService.user.uid}");
+//to get pinned chats from local storage
       if (pinnedChatsAsMap != null) {
         List<ChatItem> pinnedChatAsModel = [
           ...pinnedChatsAsMap.map((map) => ChatItem.fromJson(map)),
         ];
         pinnedChats(pinnedChatAsModel.toSet());
+      }
+//to get archived chats from local storage
+      if (archivedChatsAsMap != null) {
+        List<ChatItem> archivedAsModel = [
+          ...archivedChatsAsMap.map((map) => ChatItem.fromJson(map)),
+        ];
+        archivedChats(archivedAsModel.toSet());
       }
     }
 

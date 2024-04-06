@@ -1,5 +1,6 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/constants/color_constants.dart';
 import 'package:doots/controller/audio_controller.dart';
 import 'package:doots/controller/bottom_sheet_controller/gallery_controller.dart';
@@ -95,11 +96,9 @@ class ChattingScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          list.isNotEmpty
-                              ? list[0].nickName!
-                              : chatUser.nickName!,
-                          style: Theme.of(context)
+                        streamForNickName(
+                          chatUser,
+                          Theme.of(context)
                               .textTheme
                               .bodyLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
@@ -383,6 +382,31 @@ class ChattingScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> streamForNickName(
+    ChatUser chatUser, TextStyle? style) {
+  return StreamBuilder(
+      stream: ChatService.getNicknameStream(chatUser.id!),
+      builder: (context, snapshot) {
+        var data = snapshot.data;
+
+        if (data != null) {
+          String? nickName = data.data()!['nickName${chatUser.id!}'];
+          return Text(
+            nickName ?? chatUser.name ?? "loading..",
+            style: style,
+          );
+        } else {
+          return Text(
+            chatUser.name ?? "loading..",
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
+          );
+        }
+      });
 }
 
 class ReplyMessageWidget extends StatelessWidget {
