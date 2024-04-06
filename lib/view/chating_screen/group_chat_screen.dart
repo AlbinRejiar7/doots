@@ -167,6 +167,7 @@ class GroupChatScreen extends StatelessWidget {
 
                     if (c.chats.isNotEmpty) {
                       return ListView.builder(
+                          controller: c.scrollController,
                           padding: EdgeInsets.all(width * 0.02),
                           reverse: true,
                           itemCount: c.chats.length,
@@ -184,6 +185,7 @@ class GroupChatScreen extends StatelessWidget {
                                   c.focusNode.requestFocus();
                                 },
                                 child: ChatBubble(
+                                  isGroup: true,
                                   message: c.chats[index],
                                 ),
                               );

@@ -113,6 +113,7 @@ flutter:
     - assets/images/icons/
     - assets/images/icons/Img.png
     - assets/sounds/WhatsAppSendingMessageSoundEffect.mp3
+    - assets/images/background/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

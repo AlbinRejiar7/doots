@@ -75,12 +75,13 @@ class ChatUser {
         "nickName": nickName,
         "groupIds": groupIds, // Include groupIds in the JSON
       };
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
 
-  // @override
-  // bool operator ==(Object other) =>
-  //     identical(this, other) ||
-  //     other is ChatUser && runtimeType == other.runtimeType && id == other.id;
+    return other is ChatUser && other.id == id && other.name == name;
+  }
 
-  // @override
-  // int get hashCode => id.hashCode;
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode;
 }

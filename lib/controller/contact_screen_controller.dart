@@ -8,18 +8,17 @@ class ContactScreenController extends GetxController {
   RxList<ChatUser> selectedMembers = <ChatUser>[].obs;
   var noResultsFound = false.obs;
   var currentChatUserId = ''.obs;
+
   RxList<ChatUser> firebaseContacts = <ChatUser>[].obs;
 
   void addFirebaseContactsTolist(List<ChatUser> users) {
     firebaseContacts(users);
-    update();
   }
 
   void addFirebaseContacts(List<ChatUser> users) {
     firebaseContacts.forEach((e) {
       firebaseContacts.addAllIf(!firebaseContacts.contains(e), users);
     });
-    update();
   }
 
   RxList<ChatUser> foundedUsers = <ChatUser>[].obs;

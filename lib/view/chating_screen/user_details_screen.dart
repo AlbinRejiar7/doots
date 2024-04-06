@@ -181,6 +181,7 @@ class DetailsScreen extends StatelessWidget {
                         stream: ChatService.getMyUserData(),
                         builder: (context, snapshot) {
                           var myData = snapshot.data;
+
                           if (myData != null) {
                             return StreamBuilder(
                               stream: ChatService.getUserInfo(chatUser),
@@ -191,71 +192,82 @@ class DetailsScreen extends StatelessWidget {
                                 }
                                 var data = snapshot.data?.docs;
                                 List<String> commonGroupsId = [];
-                                if (data != null) {
-                                  List<ChatUser> otherUser = data
+                                if (data != null && data.isNotEmpty) {
+                                  // Make sure data is not null and not empty
+                                  List<ChatUser> otherUserList = data
                                       .map((e) => ChatUser.fromJson(e.data()))
                                       .toList();
-                                  commonGroupsId = myData.groupIds
-                                      .toSet()
-                                      .intersection(
-                                          otherUser[0].groupIds.toSet())
-                                      .toList();
-                                } else {
-                                  return Text("No data available");
+                                  // Check if otherUserList is not empty before accessing its first element
+                                  if (otherUserList.isNotEmpty) {
+                                    commonGroupsId = myData.groupIds
+                                        .toSet()
+                                        .intersection(otherUserList
+                                            .first.groupIds
+                                            .toSet())
+                                        .toList();
+                                  }
                                 }
-                                return StreamBuilder(
-                                  stream: ChatService.getCommonGroups(
-                                      commonGroupsId),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Text("Loading...");
-                                    }
-                                    List<GroupChat> groupsInfo = [];
-                                    if (snapshot.data != null) {
-                                      var data = snapshot.data;
-                                      if (data != null) {
-                                        var datas = data.docs;
-                                        groupsInfo = datas
-                                            .map((e) =>
-                                                GroupChat.fromJson(e.data()))
-                                            .toList();
-                                      }
-                                    } else {
-                                      return Text("No data available");
-                                    }
 
-                                    if (groupsInfo.isNotEmpty) {
-                                      return ListView.separated(
-                                        physics: NeverScrollableScrollPhysics(),
-                                        separatorBuilder: (context, index) =>
-                                            Divider(
-                                          thickness: 0.3,
-                                        ),
-                                        shrinkWrap: true,
-                                        itemCount: groupsInfo.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return Row(
-                                            children: [
-                                              CircleAvatar(
-                                                radius: width * 0.06,
-                                                backgroundImage:
-                                                    CachedNetworkImageProvider(
-                                                  groupsInfo[index].photoUrl!,
-                                                ),
+                                return commonGroupsId.isNotEmpty
+                                    ? StreamBuilder(
+                                        stream: ChatService.getCommonGroups(
+                                            commonGroupsId),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return Text("Loading...");
+                                          }
+                                          List<GroupChat> groupsInfo = [];
+                                          if (snapshot.data != null) {
+                                            var data = snapshot.data;
+                                            if (data != null) {
+                                              var datas = data.docs;
+                                              groupsInfo = datas
+                                                  .map((e) =>
+                                                      GroupChat.fromJson(
+                                                          e.data()))
+                                                  .toList();
+                                            }
+                                          } else {
+                                            return Text("No data available");
+                                          }
+
+                                          if (groupsInfo.isNotEmpty) {
+                                            return ListView.separated(
+                                              physics:
+                                                  NeverScrollableScrollPhysics(),
+                                              separatorBuilder:
+                                                  (context, index) => Divider(
+                                                thickness: 0.3,
                                               ),
-                                              kWidth(width * 0.03),
-                                              Text(groupsInfo[index].groupName),
-                                            ],
-                                          );
+                                              shrinkWrap: true,
+                                              itemCount: groupsInfo.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return Row(
+                                                  children: [
+                                                    CircleAvatar(
+                                                      radius: width * 0.06,
+                                                      backgroundImage:
+                                                          CachedNetworkImageProvider(
+                                                        groupsInfo[index]
+                                                            .photoUrl!,
+                                                      ),
+                                                    ),
+                                                    kWidth(width * 0.03),
+                                                    Text(groupsInfo[index]
+                                                        .groupName),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          } else {
+                                            return Text("No Group in Common");
+                                          }
                                         },
-                                      );
-                                    } else {
-                                      return Text("No Group in Common");
-                                    }
-                                  },
-                                );
+                                      )
+                                    : Text("No COMMON GROUP");
                               },
                             );
                           }

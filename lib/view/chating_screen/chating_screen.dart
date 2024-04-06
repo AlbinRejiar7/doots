@@ -212,6 +212,7 @@ class ChattingScreen extends StatelessWidget {
                                   c.focusNode.requestFocus();
                                 },
                                 child: ChatBubble(
+                                  isGroup: false,
                                   message: c.chats[index],
                                 ),
                               );

@@ -16,11 +16,13 @@ class ChattingScreenController extends GetxController {
   late List<ChatItem> localChats;
   var data = GetStorage();
   var pinnedChats = <ChatItem>{}.obs;
+  var archivedChats = <ChatItem>{}.obs;
   var allChats = <ChatItem>[];
   var foundedChatItem = <ChatItem>[].obs;
   var currentTapedChatUserId = ''.obs;
   var isGroupCreating = false.obs;
   List<ChatUser> contacts = [];
+  Rx<ChatUser>? currentOtherChatUser = ChatUser().obs;
   late FocusNode focusNode;
   var scrollController = ScrollController();
   var canScrollToOldest = false.obs;

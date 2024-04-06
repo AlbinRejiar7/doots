@@ -50,7 +50,7 @@ class ContactsScreen extends StatelessWidget {
               Obx(() {
                 return c.noResultsFound.value
                     ? Text("No Contacts Found")
-                    : ContactsStreamBuilder(c: c, height: height, width: width);
+                    : ContactsStreamBuilder(height: height, width: width);
               }),
             ],
           ),

@@ -12,19 +12,18 @@ import 'package:get/get.dart';
 class ContactsStreamBuilder extends StatelessWidget {
   const ContactsStreamBuilder({
     super.key,
-    required this.c,
     required this.height,
     required this.width,
     this.isSelectingForgroups = false,
   });
 
-  final ContactScreenController c;
   final double height;
   final double width;
   final bool isSelectingForgroups;
 
   @override
   Widget build(BuildContext context) {
+    var c = Get.put(ContactScreenController());
     return StreamBuilder(
         stream: ChatService.getContactsId(),
         builder: (context, snapshot) {
@@ -43,23 +42,23 @@ class ContactsStreamBuilder extends StatelessWidget {
                       child: Padding(
                     padding: EdgeInsets.only(top: height * 0.02),
                     child: ListView.builder(
-                      itemCount: c.foundedUsers.length,
+                      itemCount: _.foundedUsers.length,
                       itemBuilder: (context, index) {
-                        c.firebaseContacts.sort((a, b) {
+                        _.firebaseContacts.sort((a, b) {
                           return a.name!
                               .toLowerCase()
                               .compareTo(b.name!.toLowerCase());
                         });
                         if (index == 0 ||
-                            c.foundedUsers[index].name![0] !=
-                                c.foundedUsers[index - 1].name![0]) {
+                            _.foundedUsers[index].name![0] !=
+                                _.foundedUsers[index - 1].name![0]) {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
                                   CustomTextWidget(
-                                    text: c.foundedUsers[index].name![0],
+                                    text: _.foundedUsers[index].name![0],
                                     color:
                                         Theme.of(context).colorScheme.primary,
                                   ),
@@ -73,10 +72,10 @@ class ContactsStreamBuilder extends StatelessWidget {
                               ListTile(
                                 onTap: () async {
                                   if (isSelectingForgroups) {
-                                    if (!c.selectedMembers
-                                        .contains(c.foundedUsers[index])) {
-                                      c.selectedMembers
-                                          .add(c.foundedUsers[index]);
+                                    if (!_.selectedMembers
+                                        .contains(_.foundedUsers[index])) {
+                                      _.selectedMembers
+                                          .add(_.foundedUsers[index]);
                                     } else {
                                       Fluttertoast.showToast(
                                           msg: "Already Selected this Member");
@@ -84,16 +83,16 @@ class ContactsStreamBuilder extends StatelessWidget {
                                   } else {
                                     Get.to(
                                       () => ChattingScreen(
-                                        chatUser: c.firebaseContacts[index],
+                                        chatUser: _.firebaseContacts[index],
                                       ),
                                     );
                                   }
                                 },
                                 leading: CircleAvatar(
                                   backgroundImage: CachedNetworkImageProvider(
-                                      c.foundedUsers[index].image!),
+                                      _.foundedUsers[index].image!),
                                 ),
-                                title: Text(c.foundedUsers[index].name!),
+                                title: Text(_.foundedUsers[index].name!),
                                 // trailing: IconButton(
                                 //     onPressed: () {},
                                 //     icon: Icon(
@@ -107,9 +106,9 @@ class ContactsStreamBuilder extends StatelessWidget {
                           return ListTile(
                             onTap: () async {
                               if (isSelectingForgroups) {
-                                if (!c.selectedMembers
-                                    .contains(c.foundedUsers[index])) {
-                                  c.selectedMembers.add(c.foundedUsers[index]);
+                                if (!_.selectedMembers
+                                    .contains(_.foundedUsers[index])) {
+                                  _.selectedMembers.add(_.foundedUsers[index]);
                                 } else {
                                   Fluttertoast.showToast(
                                       msg: "Already Selected this Member");
@@ -117,14 +116,14 @@ class ContactsStreamBuilder extends StatelessWidget {
                               } else {
                                 Get.to(
                                   () => ChattingScreen(
-                                    chatUser: c.firebaseContacts[index],
+                                    chatUser: _.firebaseContacts[index],
                                   ),
                                 );
                               }
                             },
                             leading: CircleAvatar(
                               backgroundImage: CachedNetworkImageProvider(
-                                  c.foundedUsers[index].image!),
+                                  _.foundedUsers[index].image!),
                             ),
                             title: Text(c.foundedUsers[index].name!),
                             // trailing: IconButton(

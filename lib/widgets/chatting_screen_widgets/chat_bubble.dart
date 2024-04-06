@@ -5,14 +5,17 @@ import 'package:get/get.dart';
 
 class ChatBubble extends StatelessWidget {
   final Message message;
+  final bool isGroup;
   const ChatBubble({
     super.key,
     required this.message,
+    required this.isGroup,
   });
 
   @override
   Widget build(BuildContext context) {
     bool isUser = (message.fromId == ChatService.user.uid);
+
     if (!isUser && message.read.isEmpty) {
       ChatService.updateMessageStatus(
         message,
@@ -54,7 +57,7 @@ class ChatBubble extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!isUser && message.name != null)
+                if (isGroup && !isUser)
                   Text(
                     message.name!,
                     style: Theme.of(context).textTheme.bodyLarge,

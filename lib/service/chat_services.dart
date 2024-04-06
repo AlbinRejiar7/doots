@@ -11,6 +11,7 @@ import 'package:doots/controller/profile_page_controller.dart';
 import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/models/message_model.dart';
+import 'package:doots/view/chating_screen/group_details_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -214,6 +215,9 @@ class ChatService {
           messageType: type,
           fromId: user.uid,
           sent: DateTime.now().millisecondsSinceEpoch.toString());
+      await setUnreadCount(
+        chatUserId: chatUserId,
+      );
       // final ref = firestore
       //     .collection('chats/${getConversationID(chatUserId)}/messages/');
       c.scrollToOldest();
@@ -225,9 +229,6 @@ class ChatService {
       await ref.doc(individualMessage.sent).set(individualMessage.toJson());
 
       await playSendMessageSound();
-      await setUnreadCount(
-        chatUserId: chatUserId,
-      );
     } else if (groupId.isNotEmpty) {
       final Message groupMessage = Message(
           name: proCtr.currentUserData!.nickName,
@@ -315,11 +316,12 @@ class ChatService {
     }
   }
 
-  static void addNewMembersToGroup(
+  static Future<void> addNewMembersToGroup(
     String groupId,
     List<ChatUser> selectedMembersChatUser,
-    List<String> currentMembers,
   ) async {
+    var currentMembers = await getMemberIds(groupId);
+
     DocumentReference groupRef = firestore.collection('groups').doc(groupId);
     List<String> selectedMembers =
         selectedMembersChatUser.map((chatUser) => chatUser.id!).toList();
@@ -327,7 +329,7 @@ class ChatService {
     log(selectedMembers.toString());
 
     // Check for existing members
-    List<String> existingMembers = selectedMembers
+    var existingMembers = selectedMembers
         .where((member) => currentMembers.contains(member))
         .toList();
 

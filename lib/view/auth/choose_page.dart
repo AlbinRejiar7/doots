@@ -41,8 +41,8 @@ class ChoosingPage extends StatelessWidget {
           decoration: const BoxDecoration(
               image: DecorationImage(
                   fit: BoxFit.fitHeight,
-                  image: NetworkImage(
-                      "https://image.slidesdocs.com/responsive-images/docs/illustration-of-blue-sky-and-white-clouds-for-childrens-day-page-border-background-word-template_04bcf23bd2__1131_1600.jpg"))),
+                  image: AssetImage(
+                      "assets/images/background/authChoosePage.jpeg"))),
           child: Padding(
             padding: EdgeInsets.all(width * 0.1),
             child: SafeArea(
@@ -54,9 +54,9 @@ class ChoosingPage extends StatelessWidget {
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
-                  Image.network(
+                  Image.asset(
                       height: height * 0.3,
-                      "https://mailmeteor.com/logos/assets/PNG/Google_Chat_Logo_512px.png"),
+                      "assets/images/icons/Google_Chat_Logo_512px.png"),
                   const Spacer(),
                   CustomAuthButton(
                     color: Colors.green,

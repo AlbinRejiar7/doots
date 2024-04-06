@@ -10,12 +10,8 @@ import 'package:get/get.dart';
 class SelectGroupMembers extends StatelessWidget {
   final bool isUpdatingMembers;
   final String? groupId;
-  final List<String>? currentMembers;
   const SelectGroupMembers(
-      {super.key,
-      required this.isUpdatingMembers,
-      this.currentMembers,
-      this.groupId});
+      {super.key, required this.isUpdatingMembers, this.groupId});
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +27,10 @@ class SelectGroupMembers extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.done_outline_sharp),
-          onPressed: () {
+          onPressed: () async {
             if (isUpdatingMembers && c.selectedMembers.isNotEmpty) {
-              ChatService.addNewMembersToGroup(
-                  groupId!, c.selectedMembers, currentMembers!);
-
+              await ChatService.addNewMembersToGroup(
+                  groupId!, c.selectedMembers);
               Get.back();
             } else {
               Get.back();
@@ -43,9 +38,7 @@ class SelectGroupMembers extends StatelessWidget {
           }),
       body: PopScope(
         canPop: true,
-        onPopInvoked: (didPop) {
-          c.selectedMembers.clear();
-        },
+        onPopInvoked: (didPop) {},
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
@@ -98,7 +91,6 @@ class SelectGroupMembers extends StatelessWidget {
                   );
                 }),
                 ContactsStreamBuilder(
-                  c: c,
                   height: height,
                   width: width,
                   isSelectingForgroups: true,

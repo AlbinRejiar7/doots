@@ -205,7 +205,10 @@ class CreateNewGroup extends StatelessWidget {
                                       c.descriptionCtr.text,
                                       memberIds,
                                       gallaryCtr.selectedImage.value,
-                                    ).then((value) => c.isGroupCreating(false));
+                                    ).then((value) {
+                                      c.isGroupCreating(false);
+                                      contactCtr.selectedMembers.clear();
+                                    });
                                   }
                                 },
                                 child: Text(

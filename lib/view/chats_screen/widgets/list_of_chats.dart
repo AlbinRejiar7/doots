@@ -30,7 +30,6 @@ class ListOfChats extends StatelessWidget {
     var chatsCtr = Get.put(ChattingScreenController());
     var c = Get.put(ContactScreenController());
 
-    var localPinnedChats = GetStorage();
     return StreamBuilder(
         stream: ChatService.getContactsId(),
         builder: (context, snapshot) {
@@ -86,6 +85,8 @@ class ListOfChats extends StatelessWidget {
                         }
                         chatsCtr.foundedChatItem.removeWhere((chatItem) =>
                             chatsCtr.pinnedChats.contains(chatItem));
+                        chatsCtr.foundedChatItem.removeWhere((chatItem) =>
+                            chatsCtr.pinnedChats.contains(chatItem));
 
                         return Padding(
                             padding: EdgeInsets.only(top: height * 0.01),
@@ -108,29 +109,11 @@ class ListOfChats extends StatelessWidget {
                                     itemBuilder: (context, index) {
                                       return ListTile(
                                         onLongPress: () {
-                                          if (chatsCtr.pinnedChats.length < 3) {
-                                            chatsCtr.pinnedChats.add(chatsCtr
-                                                .foundedChatItem[index]);
-
-                                            List<Map<String, dynamic>>
-                                                chatMaps = chatsCtr.pinnedChats
-                                                    .map((chatItem) =>
-                                                        chatItem.toMap())
-                                                    .toList();
-                                            localPinnedChats.write(
-                                                ChatService.user.uid, chatMaps);
-                                            chatsCtr.foundedChatItem
-                                                .removeWhere((chatItem) =>
-                                                    chatsCtr.pinnedChats
-                                                        .contains(chatItem));
-                                            Fluttertoast.showToast(
-                                                msg: "Chat Pinned");
-                                            chatsCtr.update();
-                                          } else {
-                                            Fluttertoast.showToast(
-                                                msg:
-                                                    "Only 3 chats can be pinned");
-                                          }
+                                          showMenuMethod(
+                                              chats: chatsCtr
+                                                  .foundedChatItem[index],
+                                              chatsCtr: chatsCtr,
+                                              context: context);
                                         },
                                         onTap: () async {
                                           if (chatsCtr.foundedChatItem[index]
@@ -348,6 +331,30 @@ class ListOfChats extends StatelessWidget {
           }
         });
   }
+
+  Future<String?> showMenuMethod(
+      {required BuildContext context,
+      required ChatItem chats,
+      required ChattingScreenController chatsCtr}) {
+    return showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(1, 1, 0, 1),
+      items: [
+        PopupMenuItem(
+          onTap: () {},
+          value: 'archive',
+          child: Text('Archive'),
+        ),
+        PopupMenuItem(
+          onTap: () {
+            onPinnedChatPressed(chats: chats, chatsCtr: chatsCtr);
+          },
+          value: 'pin',
+          child: Text('Pin'),
+        ),
+      ],
+    );
+  }
 }
 
 class ListOfChatsTrailing extends StatelessWidget {
@@ -427,5 +434,23 @@ class ListOfChatsTrailing extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+void onPinnedChatPressed(
+    {required ChatItem chats, required ChattingScreenController chatsCtr}) {
+  var localPinnedChats = GetStorage();
+  if (chatsCtr.pinnedChats.length < 3) {
+    chatsCtr.pinnedChats.add(chats);
+
+    List<Map<String, dynamic>> chatMaps =
+        chatsCtr.pinnedChats.map((chatItem) => chatItem.toMap()).toList();
+    localPinnedChats.write(ChatService.user.uid, chatMaps);
+    chatsCtr.foundedChatItem
+        .removeWhere((chatItem) => chatsCtr.pinnedChats.contains(chatItem));
+    Fluttertoast.showToast(msg: "Chat Pinned");
+    chatsCtr.update();
+  } else {
+    Fluttertoast.showToast(msg: "Only 3 chats can be pinned");
   }
 }
