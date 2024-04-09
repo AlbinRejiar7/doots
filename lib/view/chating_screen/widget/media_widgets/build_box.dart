@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/models/message_model.dart';
-import 'package:doots/view/chating_screen/widget/details_screen_widget/photo_box.dart';
+import 'package:doots/view/chating_screen/widget/media_widgets/photo_box.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_storage/get_storage.dart';

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 class ChatBubble extends StatelessWidget {
   final Message message;
   final bool isGroup;
+
   const ChatBubble({
     super.key,
     required this.message,

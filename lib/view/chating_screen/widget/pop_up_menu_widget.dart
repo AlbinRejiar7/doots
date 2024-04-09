@@ -1,8 +1,12 @@
 import 'package:doots/constants/color_constants.dart';
+import 'package:doots/service/chat_services.dart';
+import 'package:doots/view/chating_screen/widget/show_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ChatPopupMenu extends StatelessWidget {
-  const ChatPopupMenu({super.key});
+  final String? chatId;
+  const ChatPopupMenu({super.key, this.chatId});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +32,16 @@ class ChatPopupMenu extends StatelessWidget {
               // Handle mute option
               break;
             case 'Delete':
-              // Handle delete option
+              showDialogeWidget(
+                  context: context,
+                  onPressedTick: () {
+                    if (chatId != null) {
+                      ChatService.clearChat(chatId!, context);
+                    } else {
+                      Fluttertoast.showToast(msg: "chatiD is null");
+                    }
+                  },
+                  title: "You are about to clear the chats");
               break;
           }
         },

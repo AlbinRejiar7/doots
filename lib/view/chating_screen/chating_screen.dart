@@ -184,20 +184,47 @@ class ChattingScreen extends StatelessWidget {
                       );
                     }
 
+                    // if (snapshot.data != null) {
+                    //   final messageData = snapshot.data!.docs;
+                    //   c.chats = messageData.map((e) {
+                    //     return Message.fromJson(e.data());
+                    //   }).toList();
+                    //   c.isDeleted = messageData
+                    //       .map((e) =>
+                    //           e.data()["isDeleted${ChatService.user.uid}"]
+                    //               as bool)
+                    //       .toList();
+                    // }
                     if (snapshot.data != null) {
                       final messageData = snapshot.data!.docs;
-                      c.chats = messageData
-                          .map((e) => Message.fromJson(e.data()))
-                          .toList();
+                      c.chats = messageData.map((e) {
+                        final Map<String, dynamic> data = e.data();
+                        final Message message = Message.fromJson(data);
+                        // Check if the field exists
+                        if (data
+                            .containsKey("isDeleted${ChatService.user.uid}")) {
+                          // Set isDeleted based on the field value
+                          message.isDeleted =
+                              data["isDeleted${ChatService.user.uid}"];
+                        } else {
+                          // If the field doesn't exist, set isDeleted to false
+                          message.isDeleted = false;
+                        }
+                        return message;
+                      }).toList();
                     }
 
                     if (c.chats.isNotEmpty) {
                       return ListView.builder(
-                          controller: c.scrollController,
+                          // controller: c.scrollController,
                           padding: EdgeInsets.all(width * 0.02),
                           reverse: true,
                           itemCount: c.chats.length,
                           itemBuilder: (BuildContext context, int index) {
+                            var message = c.chats[index];
+                            if (message.isDeleted ?? false) {
+                              return const SizedBox.shrink();
+                            }
                             if (c.chats[index].messageType == 'text') {
                               return SwipeTo(
                                 onLeftSwipe: (details) {
@@ -339,18 +366,23 @@ class ChattingScreen extends StatelessWidget {
                                     isBoarder: false,
                                   );
                           })),
-                          IconButton(
-                              onPressed: () {
-                                FocusScope.of(context).unfocus();
-                                if (c.isContainerVisibile.value == true) {
-                                  c.changeBottomSheet(false);
-                                } else {
-                                  c.changeBottomSheet(true);
-                                }
-                              },
-                              icon: Transform.rotate(
-                                  angle: 10,
-                                  child: const Icon(Icons.attach_file))),
+                          Obx(() {
+                            return Visibility(
+                              visible: audioCtr.isRecording.value == false,
+                              child: IconButton(
+                                  onPressed: () {
+                                    FocusScope.of(context).unfocus();
+                                    if (c.isContainerVisibile.value == true) {
+                                      c.changeBottomSheet(false);
+                                    } else {
+                                      c.changeBottomSheet(true);
+                                    }
+                                  },
+                                  icon: Transform.rotate(
+                                      angle: 10,
+                                      child: const Icon(Icons.attach_file))),
+                            );
+                          }),
                           MicAndSendButtonWidget(
                               chatUserId: chatUser.id!,
                               groupId: '',
@@ -388,22 +420,38 @@ StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> streamForNickName(
     ChatUser chatUser, TextStyle? style) {
   return StreamBuilder(
       stream: ChatService.getNicknameStream(chatUser.id!),
-      builder: (context, snapshot) {
-        var data = snapshot.data;
-
-        if (data != null) {
-          String? nickName = data.data()!['nickName${chatUser.id!}'];
+      builder: (context,
+          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          // Handle the case when data is still loading
           return Text(
-            nickName ?? chatUser.name ?? "loading..",
-            style: style,
+            "Loading...",
+            style: style ?? TextStyle(fontWeight: FontWeight.bold),
+          );
+        } else if (snapshot.hasError) {
+          // Handle the case when there's an error in fetching data
+          return Text(
+            "Error: ${snapshot.error}",
+            style: style ?? TextStyle(color: Colors.red),
           );
         } else {
+          var data = snapshot.data;
+
+          if (data != null && data.exists) {
+            // Check if the field exists in the document data
+            String? nickName = data.data()!['nickName${chatUser.id!}'];
+            if (nickName != null && nickName.isNotEmpty) {
+              return Text(
+                nickName,
+                style: style,
+              );
+            }
+          }
+          // If the nickname doesn't exist or is empty, return the original name
           return Text(
-            chatUser.name ?? "loading..",
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
+            chatUser.name ?? "Unknown User",
+            style: style ?? TextStyle(fontWeight: FontWeight.bold),
           );
         }
       });
@@ -461,4 +509,19 @@ class ReplyMessageWidget extends StatelessWidget {
       );
     });
   }
+}
+
+bool checkFieldExistence(
+    AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot,
+    String fieldName) {
+  if (snapshot.hasData) {
+    for (var doc in snapshot.data!.docs) {
+      if (doc.data().containsKey(fieldName)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+  return false;
 }

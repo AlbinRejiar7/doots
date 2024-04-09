@@ -13,7 +13,7 @@ class ChatUser {
   bool? isPhotoOn;
   bool? isLastSeenOn;
   bool? isReadReceiptOn;
-  String nickName;
+
   List<String> groupIds; // Updated field with an empty list as default
 
   ChatUser({
@@ -31,7 +31,6 @@ class ChatUser {
     this.isPhotoOn = true,
     this.isLastSeenOn = true,
     this.isReadReceiptOn = true,
-    this.nickName = '',
     List<String>? groupIds, // Updated to allow null input for groupIds
   }) : groupIds = groupIds ??
             []; // Initialize groupIds with an empty list if not provided
@@ -51,7 +50,6 @@ class ChatUser {
         isPhotoOn: json["is_photo_on"],
         isLastSeenOn: json["is_last_seen_on"],
         isReadReceiptOn: json["is_read_receipt_on"],
-        nickName: json["nickName"] ?? '',
         groupIds: json["groupIds"] != null
             ? List<String>.from(json["groupIds"])
             : [], // Parse groupIds from the JSON or initialize with an empty list
@@ -72,7 +70,6 @@ class ChatUser {
         "is_photo_on": isPhotoOn,
         "is_last_seen_on": isLastSeenOn,
         "is_read_receipt_on": isReadReceiptOn,
-        "nickName": nickName,
         "groupIds": groupIds, // Include groupIds in the JSON
       };
   @override

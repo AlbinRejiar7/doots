@@ -10,8 +10,9 @@ import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:doots/view/chating_screen/media_show_all_screen.dart';
-import 'package:doots/view/chating_screen/widget/details_screen_widget/media_grid_view_widget.dart';
+import 'package:doots/view/chating_screen/widget/media_widgets/media_grid_view_widget.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
+import 'package:doots/view/chating_screen/widget/show_dialog.dart';
 import 'package:doots/view/chats_screen/select_group_members.dart';
 import 'package:doots/view/home/home_page.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
@@ -57,7 +58,9 @@ class GroupDetailsScreen extends StatelessWidget {
                       BackButton(
                         color: kWhite,
                       ),
-                      ChatPopupMenu(),
+                      ChatPopupMenu(
+                        chatId: groupChatInfo.groupId,
+                      ),
                     ],
                   ),
                   Padding(
@@ -65,8 +68,8 @@ class GroupDetailsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          groupChatInfo.groupName,
+                        NameStreamForGroup(
+                          groupChatInfo: groupChatInfo,
                           style: Theme.of(context)
                               .textTheme
                               .bodyLarge!
@@ -78,7 +81,7 @@ class GroupDetailsScreen extends StatelessWidget {
                                   color: kWhite,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 30),
-                        ),
+                        )
                       ],
                     ),
                   ),
@@ -124,8 +127,8 @@ class GroupDetailsScreen extends StatelessWidget {
                           Text("Group Name :",
                               style: Theme.of(context).textTheme.bodyLarge),
                           kWidth(width * 0.02),
-                          Text(
-                            groupChatInfo.groupName,
+                          NameStreamForGroup(
+                            groupChatInfo: groupChatInfo,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyLarge
@@ -157,6 +160,7 @@ class GroupDetailsScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: CustomTextField(
+                                  controller: c.groupNameCtr,
                                   hintText: "Enter name",
                                   isBoarder: false,
                                   fillColor: Theme.of(context).primaryColor,
@@ -165,7 +169,16 @@ class GroupDetailsScreen extends StatelessWidget {
                               ),
                               kWidth(width * 0.01),
                               ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    ChatService.changeGroupName(
+                                            groupChatInfo.groupId,
+                                            c.groupNameCtr.text)
+                                        .then((value) {
+                                      c.changeEditingState();
+                                      c.groupNameCtr.clear();
+                                      c.update();
+                                    });
+                                  },
                                   icon: const Icon(
                                     Icons.save_alt,
                                     color: kgreen1,
@@ -284,9 +297,10 @@ class GroupDetailsScreen extends StatelessWidget {
                                                                 .image!),
                                                   ),
                                                   kWidth(width * 0.03),
-                                                  Text(ctr
-                                                      .groupMembersInfo[index]
-                                                      .name!),
+                                                  streamForNickName(
+                                                      ctr.groupMembersInfo[
+                                                          index],
+                                                      TextStyle()),
                                                   const Spacer(),
                                                   ctr.groupMembersInfo[index]
                                                               .id ==
@@ -383,32 +397,6 @@ class GroupDetailsScreen extends StatelessWidget {
     );
   }
 
-  Future<dynamic> showDialogeWidget({
-    required BuildContext context,
-    required void Function()? onPressedTick,
-    required String title,
-  }) {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        actions: [
-          TextButton(onPressed: onPressedTick, child: Text("Yes")),
-          TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: Text("No"))
-        ],
-      ),
-    );
-  }
-
   void onPressedLeaveGroup({
     required GroupChat groupInfo,
   }) async {
@@ -459,6 +447,38 @@ class GroupDetailsScreen extends StatelessWidget {
     } on FirebaseException catch (e) {
       Fluttertoast.showToast(msg: e.message.toString());
     }
+  }
+}
+
+class NameStreamForGroup extends StatelessWidget {
+  const NameStreamForGroup({
+    super.key,
+    required this.groupChatInfo,
+    this.style,
+  });
+
+  final GroupChat groupChatInfo;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: ChatService.getGroupNameStream(groupChatInfo.groupId),
+        builder: (context, snapshot) {
+          var data = snapshot.data;
+          String changedGroupName = data?['groupName'] ?? "";
+          if (changedGroupName.isNotEmpty) {
+            return Text(
+              changedGroupName,
+              style: style,
+            );
+          } else {
+            return Text(
+              groupChatInfo.groupName,
+              style: style,
+            );
+          }
+        });
   }
 }
 

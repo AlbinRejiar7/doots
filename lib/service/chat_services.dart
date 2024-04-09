@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doots/constants/color_constants.dart';
 import 'package:doots/constants/global.dart';
 import 'package:doots/controller/bottom_sheet_controller/gallery_controller.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
@@ -12,8 +13,10 @@ import 'package:doots/models/chat_user.dart';
 import 'package:doots/models/group_model.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/view/chating_screen/group_details_screen.dart';
+import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -21,9 +24,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatService {
-  Timer? typingTimer;
-  bool isTyping = false;
-
   static User get user => authInstance.currentUser!;
   static FirebaseFirestore get firestore => FirebaseFirestore.instance;
   static FirebaseStorage get storage => FirebaseStorage.instance;
@@ -33,26 +33,6 @@ class ChatService {
         .setAsset("assets/sounds/WhatsAppSendingMessageSoundEffect.mp3");
     await player.play();
     player.dispose();
-  }
-
-  static void onTextChanged(String text, String groupID) {
-    ChatService chatService = ChatService();
-
-    chatService.isTyping = text.isNotEmpty;
-    if (chatService.isTyping) {
-      chatService.typingTimer?.cancel();
-      chatService.typingTimer =
-          Timer(const Duration(seconds: 4), () => onTypingTimeout(groupID));
-    }
-  }
-
-  static void onTypingTimeout(String groupID) {
-    ChatService chatService = ChatService();
-    if (chatService.isTyping) {
-      chatService.isTyping = false;
-      updateIsTypingStatusOfGroup(
-          groupID, false); // Call your function to update Firestore
-    }
   }
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers(
@@ -198,7 +178,7 @@ class ChatService {
     proCtr.fetchUserData();
     if (chatUserId.isNotEmpty) {
       final Message individualMessage = Message(
-          name: proCtr.currentUserData!.nickName,
+          name: proCtr.currentUserData!.name,
           replyMessage: replyMessage ?? '',
           duration: duration ?? "",
           localThumbnailPath: localThumbnailPath ?? "",
@@ -231,7 +211,7 @@ class ChatService {
       await playSendMessageSound();
     } else if (groupId.isNotEmpty) {
       final Message groupMessage = Message(
-          name: proCtr.currentUserData!.nickName,
+          name: proCtr.currentUserData!.name,
           replyMessage: replyMessage ?? '',
           duration: duration ?? "",
           localThumbnailPath: localThumbnailPath ?? "",
@@ -720,11 +700,118 @@ class ChatService {
       DocumentReference<Map<String, dynamic>> docRef =
           chats.doc(conversationID);
       DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
-
-      // Check if the field exists
       if (docSnapshot.exists &&
           docSnapshot.data()!.containsKey("nickName${chatUser.id}")) {
-        // Field exists, update it
+        await docRef.update(data);
+      } else {
+        await docRef.set(data, SetOptions(merge: true));
+      }
+    } on FirebaseException catch (e) {
+      Fluttertoast.showToast(msg: e.message.toString());
+    }
+  }
+
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getNicknameStream(
+      String chatUserId) {
+    String conversationID = getConversationID(chatUserId);
+    return firestore
+        .collection("chats")
+        .doc(conversationID)
+        .snapshots()
+        .first
+        .asStream();
+  }
+
+  static Future<DocumentSnapshot<Map<String, dynamic>>> getNicknameAsFuture(
+      String chatUserId) async {
+    String conversationID = getConversationID(chatUserId);
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection("chats")
+          .doc(conversationID)
+          .get();
+      if (snapshot.exists) {
+        return snapshot;
+      } else {
+        throw Exception("Document does not exist");
+      }
+    } catch (e) {
+      throw Exception("Error getting document: $e");
+    }
+  }
+
+  static Future<void> isReadOn(bool isVisible) async {
+    try {
+      CollectionReference<Map<String, dynamic>> users =
+          firestore.collection('users');
+
+      await users.doc(user.uid).update({'is_read_receipt_on': isVisible});
+      print('Document updated successfully!');
+    } catch (error) {
+      print('Error updating document: $error');
+    }
+  }
+
+  static Future<void> clearChat(String chatId, BuildContext context) async {
+    loadingCircleProgressIndicator(context);
+
+    FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .get()
+        .then((querySnapshot) {
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      for (var doc in querySnapshot.docs) {
+        batch.update(doc.reference, {'isDeleted${ChatService.user.uid}': true});
+      }
+      return batch.commit();
+    }).then((_) {
+      Get.back();
+      Get.back();
+    }).catchError((error) {
+      print("Error clearing chat: $error");
+      Get.back();
+    });
+  }
+
+  static Future<dynamic> loadingCircleProgressIndicator(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) => Center(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: kWhite,
+                strokeWidth: 2,
+              ),
+              kHeight(10),
+              Text(
+                "Clearing Chats",
+                style: TextStyle(color: kWhite),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Future<void> changeGroupName(String groupID, String newName) async {
+    try {
+      CollectionReference<Map<String, dynamic>> chats =
+          firestore.collection('groups');
+
+      Map<String, dynamic> data = {"groupName": newName};
+
+      DocumentReference<Map<String, dynamic>> docRef = chats.doc(groupID);
+      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
+
+      // Check if the field exists
+      if (docSnapshot.exists && docSnapshot.data()!.containsKey("groupName")) {
         await docRef.update(data);
         log('Field updated successfully.');
       } else {
@@ -741,47 +828,8 @@ class ChatService {
     }
   }
 
-  static Future<String?> getNickName(String chatUserId) async {
-    try {
-      CollectionReference<Map<String, dynamic>> chats =
-          firestore.collection('chats');
-      String conversationID = getConversationID(chatUserId);
-
-      DocumentReference<Map<String, dynamic>> docRef =
-          chats.doc(conversationID);
-      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await docRef.get();
-      if (docSnapshot.exists &&
-          docSnapshot.data()!.containsKey("nickName${chatUserId}")) {
-        String? nickName = docSnapshot.get('nickName${chatUserId}') as String;
-        log(nickName.toString() + "This is my nickname");
-        return nickName;
-      }
-    } on FirebaseException catch (e) {
-      Fluttertoast.showToast(msg: e.message.toString());
-    }
-    return null;
-  }
-
-  static Stream<DocumentSnapshot<Map<String, dynamic>>> getNicknameStream(
-      String chatUserId) {
-    String conversationID = getConversationID(chatUserId);
-    return firestore
-        .collection("chats")
-        .doc(conversationID)
-        .snapshots()
-        .first
-        .asStream();
-  }
-
-  static Future<void> isReadOn(bool isVisible) async {
-    try {
-      CollectionReference<Map<String, dynamic>> users =
-          firestore.collection('users');
-
-      await users.doc(user.uid).update({'is_read_receipt_on': isVisible});
-      print('Document updated successfully!');
-    } catch (error) {
-      print('Error updating document: $error');
-    }
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getGroupNameStream(
+      String groupId) {
+    return firestore.collection("groups").doc(groupId).get().asStream();
   }
 }

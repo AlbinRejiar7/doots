@@ -16,7 +16,7 @@ Future<dynamic> createContactOrGroup(BuildContext context) {
             "Please select your Option",
             style: Theme.of(context).textTheme.bodyLarge,
           ),
-          CloseButton(),
+          Flexible(child: CloseButton()),
         ],
       ),
       content: Column(

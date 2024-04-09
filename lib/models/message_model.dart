@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doots/service/chat_services.dart';
 
 class Message {
   String toId;
@@ -17,7 +18,8 @@ class Message {
   String localThumbnailPath;
   String duration;
   String replyMessage;
-  String? name; // Updated field
+  String? name;
+  bool? isDeleted; // New field
 
   Message({
     required this.toId,
@@ -36,7 +38,8 @@ class Message {
     this.isDownloaded = false,
     this.isDownloading = false,
     required this.replyMessage,
-    this.name, // Updated field
+    this.name,
+    this.isDeleted = false, // Initialize the new field
   });
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
@@ -56,7 +59,9 @@ class Message {
         isDownloaded: json["isDownloaded"],
         isDownloading: json["isDownloading"],
         replyMessage: json["replyMessage"],
-        name: json["name"], // Updated field
+        name: json["name"],
+        isDeleted: json["isDeleted${ChatService.user.uid}"] ??
+            false, // New field with default value
       );
 
   Map<String, dynamic> toJson() => {
@@ -76,7 +81,8 @@ class Message {
         "isDownloaded": isDownloaded,
         "isDownloading": isDownloading,
         "replyMessage": replyMessage,
-        if (name != null) "name": name, // Updated field
+        if (name != null) "name": name,
+        "isDeleted${ChatService.user.uid}": isDeleted, // New field
         "createdAt": FieldValue.serverTimestamp(),
       };
 }

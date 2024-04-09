@@ -4,7 +4,7 @@ import 'package:doots/controller/bottom_sheet_controller/document_controller.dar
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/models/message_model.dart';
 import 'package:doots/service/chat_services.dart';
-import 'package:doots/view/chating_screen/widget/details_screen_widget/build_box.dart';
+import 'package:doots/view/chating_screen/widget/media_widgets/build_box.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,8 +24,10 @@ class MediaGridViewWidget extends StatelessWidget {
     c.chats.forEach((element) {
       log(element.msg);
     });
-    final List<Message> mediaChats =
-        c.chats.where((chat) => chat.messageType != "text").toList();
+    final List<Message> mediaChats = c.chats
+        .where(
+            (chat) => chat.messageType != "text" && !(chat.isDeleted ?? false))
+        .toList();
 
     return GridView.builder(
       physics: NeverScrollableScrollPhysics(),

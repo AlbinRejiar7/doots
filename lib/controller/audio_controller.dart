@@ -5,7 +5,6 @@ import 'package:doots/service/chat_services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:record/record.dart';
 import 'package:uuid/uuid.dart';
 
 class AudioController extends GetxController {
@@ -17,7 +16,7 @@ class AudioController extends GetxController {
   }
 
   late Directory appDirectory;
-  AudioRecorder audioRecorder = AudioRecorder();
+
   var isRecording = false.obs;
   var isLoading = false.obs;
   var universalRecordingPath = ''.obs;
@@ -39,6 +38,22 @@ class AudioController extends GetxController {
     return pathParts.last;
   }
 
+  Future<void> cancelRecording() async {
+    if (isRecording.value == true) {
+      try {
+        // Reset recorder controller
+        recorderController.reset();
+        // Stop recording without saving the file
+        await recorderController.stop(true);
+        // Update recording status
+        isRecording.value = false;
+        update();
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+    }
+  }
+
   void startOrStopRecording(
       {required String? chatUserId, required String? groupId}) async {
     if (chatUserId != null) {
@@ -54,6 +69,7 @@ class AudioController extends GetxController {
             isRecording.value = !isRecording.value;
             update();
             Duration duration = recorderController.recordedDuration;
+
             isRecordingCompleted.value = true;
             await ChatService.sendAudioDoc(
               chatUserId: chatUserId,
@@ -91,35 +107,9 @@ class AudioController extends GetxController {
       ..bitRate = 320000;
   }
 
-  // Future<void> startRecording() async {
-  //   try {
-  //     if (await audioRecorder.hasPermission()) {
-  //       final directory = await getApplicationDocumentsDirectory();
-  //       await audioRecorder.start(const RecordConfig(),
-  //           path: '${directory.path}/${const Uuid().v4()}myFile.m4a');
-
-  //       isRecording(true);
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar("Error", e.toString());
-  //   }
-  // }
-
-  // Future<void> stopRecording() async {
-  //   try {
-  //     String? path = await audioRecorder.stop();
-
-  //     universalRecordingPath(path);
-  //     isRecording(false);
-  //   } catch (e) {
-  //     Get.snackbar("Error", e.toString());
-  //   }
-  // }
-
   @override
   void dispose() {
     super.dispose();
     recorderController.dispose();
-    audioRecorder.dispose();
   }
 }

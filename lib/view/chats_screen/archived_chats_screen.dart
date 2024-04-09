@@ -68,7 +68,7 @@ class ArchivedChatsScreen extends StatelessWidget {
                 backgroundImage:
                     CachedNetworkImageProvider(archivedChats.imageUrl),
               ),
-              title: Text(archivedChats.name),
+              title: getNickNameStream(archivedChats.id, archivedChats.name),
               subtitle: archivedChats.type == "user"
                   ? StreamBuilder(
                       stream: ChatService.getLastMessage(archivedChats.id),

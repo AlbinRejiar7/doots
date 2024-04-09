@@ -51,7 +51,7 @@ class ChatsScreen extends StatelessWidget {
             kHeight(height * 0.02),
             CustomTextField(
                 onChanged: (value) {
-                  chatCtr.runfilter(value);
+                  chatCtr.runFilter(value);
                 },
                 filled: true,
                 fillColor: Theme.of(context).primaryColor,
@@ -63,13 +63,19 @@ class ChatsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            ListTile(
-              onTap: () {
-                Get.to(() => ArchivedChatsScreen());
-              },
-              leading: IconButton(onPressed: null, icon: Icon(Icons.archive)),
-              title: Text("Archived"),
-            ),
+            Obx(() {
+              return Visibility(
+                visible: chatCtr.archivedChats.toList().isNotEmpty,
+                child: ListTile(
+                  onTap: () {
+                    Get.to(() => ArchivedChatsScreen());
+                  },
+                  leading:
+                      IconButton(onPressed: null, icon: Icon(Icons.archive)),
+                  title: Text("Archived"),
+                ),
+              );
+            }),
             ListOfPinnedChats(
                 chatCtr: chatCtr,
                 c: c,
@@ -151,7 +157,8 @@ class ListOfPinnedChats extends StatelessWidget {
               backgroundImage: CachedNetworkImageProvider(
                   chatCtr.pinnedChats.toList()[index].imageUrl),
             ),
-            title: Text(chatCtr.pinnedChats.toList()[index].name),
+            title: getNickNameStream(chatCtr.pinnedChats.toList()[index].id,
+                chatCtr.pinnedChats.toList()[index].name),
             subtitle: chatCtr.pinnedChats.toList()[index].type == "user"
                 ? StreamBuilder(
                     stream: ChatService.getLastMessage(

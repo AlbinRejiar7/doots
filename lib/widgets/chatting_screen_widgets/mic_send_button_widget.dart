@@ -79,117 +79,63 @@ class MicAndSendButtonWidget extends StatelessWidget {
         curve: Curves.easeInOut,
 
         child: Obx(() {
-          return SizedBox(
-            height: height * audioCtr.iconSize.value,
-            width: height * audioCtr.iconSize.value,
-            child: Card(
-              elevation: 0,
-              color: kGreen,
-              shape: CircleBorder(),
-              child: Obx(() {
-                return !c.isMic.value
-                    ? const Icon(
-                        Icons.send,
-                        color: kWhite,
-                      )
-                    : GestureDetector(
-                        onLongPress: () async {
-                          audioCtr.changeIconSize(.09);
-                          if (await Permission.microphone.isGranted) {
-                            audioCtr.startOrStopRecording(
-                                chatUserId: chatUserId, groupId: groupId);
-                          } else {
-                            await Permission.microphone.request();
-                          }
+          return Row(
+            children: [
+              Visibility(
+                visible: audioCtr.isRecording.value == false,
+                child: SizedBox(
+                  height: height * audioCtr.iconSize.value,
+                  width: height * audioCtr.iconSize.value,
+                  child: Card(
+                    elevation: 0,
+                    color: kGreen,
+                    shape: CircleBorder(),
+                    child: Obx(() {
+                      return !c.isMic.value
+                          ? const Icon(
+                              Icons.send,
+                              color: kWhite,
+                            )
+                          : GestureDetector(
+                              onTap: () async {
+                                if (await Permission.microphone.isGranted) {
+                                  audioCtr.startOrStopRecording(
+                                      chatUserId: chatUserId, groupId: groupId);
+                                } else {
+                                  await Permission.microphone.request();
+                                }
+                              },
+                              child: const Icon(Icons.mic, color: kWhite));
+                    }),
+                  ),
+                ),
+              ),
+              Obx(() {
+                return Visibility(
+                  visible: audioCtr.isRecording.value,
+                  child: Row(
+                    children: [
+                      CloseButton(
+                        onPressed: () async {
+                          await audioCtr.cancelRecording();
                         },
-                        onLongPressEnd: (details) async {
-                          audioCtr.changeIconSize(0.06);
-
-                          if (await Permission.microphone.isGranted) {
-                            audioCtr.startOrStopRecording(
-                                chatUserId: chatUserId, groupId: groupId);
-                          }
-                        },
-                        child: const Icon(Icons.mic, color: kWhite));
-              }),
-            ),
+                      ),
+                      IconButton(
+                          onPressed: () async {
+                            if (await Permission.microphone.isGranted) {
+                              audioCtr.startOrStopRecording(
+                                  chatUserId: chatUserId, groupId: groupId);
+                            }
+                          },
+                          icon: Icon(Icons.send)),
+                    ],
+                  ),
+                );
+              })
+            ],
           );
         }),
       ),
     );
   }
 }
-
-// class MicAndSendButtonWidgetGroup extends StatelessWidget {
-//   const MicAndSendButtonWidgetGroup({
-//     super.key,
-//     required this.c,
-//     required this.height,
-//     required this.audioCtr,
-//     required this.groupId,
-//   });
-//   final ChattingScreenController c;
-//   final double height;
-//   final AudioController audioCtr;
-//   final String groupId;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: () {
-//         if (c.chatCtr.text.isNotEmpty) {
-//           ChatService.sendMessage(
-//             isGroupChat: true,
-//             groupId: groupId,
-//             msg: c.chatCtr.text,
-//             type: 'text',
-//           );
-//           c.chatCtr.clear();
-
-//           c.changeMicState(true);
-//         }
-//       },
-//       child: AnimatedContainer(
-//         duration:
-//             const Duration(milliseconds: 300), // Adjust duration as needed
-//         curve: Curves.easeInOut,
-
-//         child: Obx(() {
-//           return SizedBox(
-//             height: height * audioCtr.iconSize.value,
-//             width: height * audioCtr.iconSize.value,
-//             child: Card(
-//               elevation: 0,
-//               color: kGreen,
-//               shape: CircleBorder(),
-//               child: Obx(() {
-//                 return !c.isMic.value
-//                     ? const Icon(
-//                         Icons.send,
-//                         color: kWhite,
-//                       )
-//                     : GestureDetector(
-//                         onLongPress: () async {
-//                           audioCtr.changeIconSize(.09);
-//                           if (await Permission.microphone.isGranted) {
-//                             // audioCtr.startOrStopRecording();
-//                           } else {
-//                             await Permission.microphone.request();
-//                           }
-//                         },
-//                         onLongPressEnd: (details) async {
-//                           audioCtr.changeIconSize(0.06);
-
-//                           if (await Permission.microphone.isGranted) {
-//                             // audioCtr.startOrStopRecording();
-//                           }
-//                         },
-//                         child: const Icon(Icons.mic, color: kWhite));
-//               }),
-//             ),
-//           );
-//         }),
-//       ),
-//     );
-//   }
-// }

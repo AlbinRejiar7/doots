@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doots/controller/chatting_screen_controller.dart';
 import 'package:doots/controller/contact_screen_controller.dart';
 import 'package:doots/models/chat_items.dart';
@@ -57,7 +58,7 @@ class ListOfChats extends StatelessWidget {
                       return chatUser;
                     }).toList());
 
-                    chatsCtr.allChats.addAll(data.map((e) {
+                    var convertToChatItems = data.map((e) {
                       return ChatItem(
                         id: e.get("id"),
                         name: e.get("name"),
@@ -66,7 +67,8 @@ class ListOfChats extends StatelessWidget {
                             ? e.get('image')
                             : "https://www.dpforwhatsapp.in/img/no-dp/19.webp",
                       );
-                    }).toList());
+                    }).toList();
+                    chatsCtr.allChats.addAll(convertToChatItems);
                   }
 
                   if (chatsCtr.allChats.isNotEmpty) {
@@ -156,11 +158,24 @@ class ListOfChats extends StatelessWidget {
                                                 if (snapshot.data != null) {
                                                   final messageData =
                                                       snapshot.data!.docs;
-                                                  final list = messageData
-                                                      .map((e) =>
-                                                          Message.fromJson(
-                                                              e.data()))
-                                                      .toList();
+                                                  final list =
+                                                      messageData.map((e) {
+                                                    final Map<String, dynamic>
+                                                        data = e.data();
+                                                    final Message message =
+                                                        Message.fromJson(data);
+                                                    // Check if the field exists
+                                                    if (data.containsKey(
+                                                        "isDeleted${ChatService.user.uid}")) {
+                                                      // Set isDeleted based on the field value
+                                                      message.isDeleted = data[
+                                                          "isDeleted${ChatService.user.uid}"];
+                                                    } else {
+                                                      // If the field doesn't exist, set isDeleted to false
+                                                      message.isDeleted = false;
+                                                    }
+                                                    return message;
+                                                  }).toList();
 
                                                   if (list.isNotEmpty) {
                                                     chatsCtr.foundedChatItem[index] =
@@ -182,27 +197,36 @@ class ListOfChats extends StatelessWidget {
                                                             lastMessageAt:
                                                                 list[0].sent);
 
-                                                    if (types.contains(
-                                                        list[0].messageType)) {
-                                                      return Row(
-                                                        children: [
-                                                          Icon(
-                                                            getMessageIcon(list[
-                                                                    0]
+                                                    if (!(list[0].isDeleted ??
+                                                        false)) {
+                                                      if (types.contains(list[0]
+                                                          .messageType)) {
+                                                        return Row(
+                                                          children: [
+                                                            Icon(
+                                                              getMessageIcon(list[
+                                                                      0]
+                                                                  .messageType),
+                                                              size:
+                                                                  width * 0.05,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                            ),
+                                                            kWidth(
+                                                                width * 0.02),
+                                                            Text(list[0]
                                                                 .messageType),
-                                                            size: width * 0.05,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .iconTheme
-                                                                .color,
-                                                          ),
-                                                          kWidth(width * 0.02),
-                                                          Text(list[0]
-                                                              .messageType),
-                                                        ],
-                                                      );
+                                                          ],
+                                                        );
+                                                      } else {
+                                                        return Text(
+                                                            list[0].msg);
+                                                      }
                                                     } else {
-                                                      return Text(list[0].msg);
+                                                      return Text(
+                                                          "all message cleared");
                                                     }
                                                   } else {
                                                     return Text(
@@ -213,8 +237,8 @@ class ListOfChats extends StatelessWidget {
                                                 }
                                               })
                                           : StreamBuilder(
-                                              stream: ChatService.getLastMessageOfGroup(
-                                                  chatsCtr
+                                              stream: ChatService
+                                                  .getLastMessageOfGroup(chatsCtr
                                                       .foundedChatItem[index]
                                                       .id),
                                               builder: (context, snapshot) {
@@ -299,30 +323,9 @@ class ListOfChats extends StatelessWidget {
                                       ),
                                       title: chatsCtr.foundedChatItem[index].type ==
                                               "user"
-                                          ? StreamBuilder(
-                                              stream:
-                                                  ChatService.getNicknameStream(
-                                                      chatsCtr
-                                                          .foundedChatItem[index]
-                                                          .id),
-                                              builder: (context, snapshot) {
-                                                var data = snapshot.data;
-
-                                                if (data != null) {
-                                                  String? nickName = data
-                                                          .data()![
-                                                      'nickName${chatsCtr.foundedChatItem[index].id}'];
-                                                  return Text(nickName ??
-                                                      chatsCtr
-                                                          .foundedChatItem[
-                                                              index]
-                                                          .name);
-                                                } else {
-                                                  return Text(chatsCtr
-                                                      .foundedChatItem[index]
-                                                      .name);
-                                                }
-                                              })
+                                          ? getNickNameStream(
+                                              chatsCtr.foundedChatItem[index].id,
+                                              chatsCtr.foundedChatItem[index].name)
                                           : Text(chatsCtr.foundedChatItem[index].name));
                                 },
                               ));
@@ -479,4 +482,34 @@ void onArchiveChatPressed(
       .removeWhere((chatItem) => chatsCtr.archivedChats.contains(chatItem));
   Fluttertoast.showToast(msg: "Chat Archived");
   chatsCtr.update();
+}
+
+StreamBuilder<DocumentSnapshot<Map<String, dynamic>>> getNickNameStream(
+    String chatUserId, String ogName) {
+  return StreamBuilder(
+      stream: ChatService.getNicknameStream(chatUserId),
+      builder: (context,
+          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Handle the case when data is still loading
+          return Text("Loading...");
+        } else if (snapshot.hasError) {
+          // Handle the case when there's an error in fetching data
+          return Text("Error: ${snapshot.error}");
+        } else {
+          var data = snapshot.data;
+
+          if (data != null && data.exists) {
+            // Check if the field exists in the document data
+            String? nickName = data.data()!['nickName${chatUserId}'];
+
+            if (nickName != null && nickName.isNotEmpty) {
+              return Text(nickName);
+            }
+          }
+
+          // If the nickname doesn't exist or is empty, return the original name
+          return Text(ogName);
+        }
+      });
 }

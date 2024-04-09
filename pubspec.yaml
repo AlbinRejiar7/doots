@@ -42,13 +42,7 @@ dependencies:
   emoji_picker_flutter: ^1.5.1
   path_provider: ^2.1.2
   permission_handler: ^11.3.0
-  record: ^5.0.4
   uuid: ^3.0.1
-  voice_message_package:
-#    path: ../voice_message_player-code-with-bisky
-    git:
-      url: https://github.com/codewithbisky/voice_message_player.git
-      ref: master
   file_picker: ^6.1.1
   open_filex: ^4.4.0
   image_picker: ^1.0.7
@@ -70,7 +64,6 @@ dependencies:
   firebase_storage: ^11.6.0
   cached_network_image: ^3.3.1
   audioplayers: ^5.2.1
-  just_audio: ^0.9.36
   dio: ^5.4.1
   http: ^1.2.0
   gallery_saver_updated: ^3.0.0
@@ -79,6 +72,7 @@ dependencies:
   flutter_audio_waveforms: ^1.2.1+8
   swipe_to: ^1.0.6
   rxdart: ^0.27.7
+  just_audio: ^0.9.37
 
 
 

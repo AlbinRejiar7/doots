@@ -1,9 +1,9 @@
 class ChatItem {
-  final String id;
-  final String name;
-  final String type; // "user" or "group"
-  final String imageUrl; // optional
-  final String? lastMessageAt; // optional
+  String id;
+  String name;
+  String type; // "user" or "group"
+  String imageUrl; // optional
+  String? lastMessageAt; // optional
   ChatItem({
     required this.id,
     required this.name,

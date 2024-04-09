@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ChattingScreenController extends GetxController {
-  var otherChatUserData = ChatUser(nickName: "", groupIds: []).obs;
+  var otherChatUserData = ChatUser(groupIds: []).obs;
   Rx<String?> pinnedChatId = null.obs;
   late List<ChatItem> localChats;
   var data = GetStorage();
@@ -30,11 +30,12 @@ class ChattingScreenController extends GetxController {
   TextEditingController groupNameCtr = TextEditingController();
   TextEditingController descriptionCtr = TextEditingController();
   List<Message> chats = [];
+  List<bool> isDeleted = [];
   void scrollToOldest() {
     if (scrollController.hasClients) {
       scrollController.animateTo(
         0.0,
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeIn,
       );
     }
@@ -43,7 +44,7 @@ class ChattingScreenController extends GetxController {
   void fetchDataOfOtherUser(String otheruserId) async {
     DocumentSnapshot<Map<String, dynamic>> otherUserData =
         await ChatService.firestore.collection("users").doc(otheruserId).get();
-    otherChatUserData!.value = ChatUser.fromJson(otherUserData.data()!);
+    otherChatUserData.value = ChatUser.fromJson(otherUserData.data()!);
   }
 
   void scrollToLatest() {
@@ -56,18 +57,40 @@ class ChattingScreenController extends GetxController {
     }
   }
 
-  void runfilter(String query) {
+  void runFilter(String query) async {
     List<ChatItem> results = [];
+    List<ChatItem> renamedChats = [];
+    for (var chatItem in allChats) {
+      if (chatItem.type == "user") {
+        var data = await ChatService.getNicknameAsFuture(chatItem.id);
+        String? nickName = data.data()?['nickName${chatItem.id}'];
+        if (nickName != null) {
+          final newChatItem = ChatItem(
+            name: nickName,
+            id: chatItem.id,
+            type: chatItem.type,
+            imageUrl: chatItem.imageUrl,
+          );
+          renamedChats.add(newChatItem);
+        } else {
+          // If nickName is null, use the original name
+          renamedChats.add(chatItem);
+        }
+      } else {
+        // If it's not of type "user", add the existing chatItem directly
+        renamedChats.add(chatItem);
+      }
+    }
 
     if (query.isEmpty) {
-      results = allChats;
+      results = renamedChats;
     } else {
-      results = allChats
+      results = renamedChats
           .where(
-              (items) => items.name.toLowerCase().contains(query.toLowerCase()))
+              (item) => item.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
       if (results.isEmpty) {
-        Fluttertoast.showToast(msg: "No Result found on your Query");
+        Fluttertoast.showToast(msg: "No results found for your query");
       }
     }
 

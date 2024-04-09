@@ -1,6 +1,6 @@
 import 'package:doots/controller/bottom_sheet_controller/document_controller.dart';
 import 'package:doots/models/message_model.dart';
-import 'package:doots/view/chating_screen/widget/details_screen_widget/build_box.dart';
+import 'package:doots/view/chating_screen/widget/media_widgets/build_box.dart';
 import 'package:doots/widgets/chatting_screen_widgets/document_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';

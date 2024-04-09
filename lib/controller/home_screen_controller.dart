@@ -20,7 +20,7 @@ class HomeScreenController extends GetxController {
     const ContactsScreen(),
     const CallsScreen(),
     const SizedBox(),
-    ProfileScreen(),
+    const ProfileScreen(),
     const SettingScreen(),
   ];
   var currentIndex = 0.obs;

@@ -6,7 +6,7 @@ import 'package:doots/models/group_model.dart';
 import 'package:doots/service/chat_services.dart';
 import 'package:doots/view/chating_screen/chating_screen.dart';
 import 'package:doots/view/chating_screen/media_show_all_screen.dart';
-import 'package:doots/view/chating_screen/widget/details_screen_widget/media_grid_view_widget.dart';
+import 'package:doots/view/chating_screen/widget/media_widgets/media_grid_view_widget.dart';
 import 'package:doots/view/chating_screen/widget/pop_up_menu_widget.dart';
 import 'package:doots/widgets/sizedboxwidget.dart';
 import 'package:doots/widgets/text_field.dart';
@@ -43,13 +43,15 @@ class DetailsScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       BackButton(
                         color: kWhite,
                       ),
-                      ChatPopupMenu(),
+                      ChatPopupMenu(
+                        chatId: ChatService.getConversationID(chatUser.id!),
+                      ),
                     ],
                   ),
                   Padding(
