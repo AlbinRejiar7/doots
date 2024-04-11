@@ -50,6 +50,7 @@ class DetailsScreen extends StatelessWidget {
                         color: kWhite,
                       ),
                       ChatPopupMenu(
+                        groupId: '',
                         chatId: ChatService.getConversationID(chatUser.id!),
                       ),
                     ],

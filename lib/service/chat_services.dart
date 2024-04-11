@@ -196,6 +196,7 @@ class ChatService {
           fromId: user.uid,
           sent: DateTime.now().millisecondsSinceEpoch.toString());
       await setUnreadCount(
+        groupId: '',
         chatUserId: chatUserId,
       );
       // final ref = firestore
@@ -228,6 +229,10 @@ class ChatService {
           messageType: type,
           fromId: user.uid,
           sent: DateTime.now().millisecondsSinceEpoch.toString());
+      await setUnreadCount(
+        groupId: groupId,
+        chatUserId: '',
+      );
       final ref = firestore.collection('groups/$groupId/messages/');
       await ref.doc(groupMessage.sent).set(groupMessage.toJson());
       await playSendMessageSound();
@@ -257,24 +262,75 @@ class ChatService {
     });
   }
 
+  static Stream<int> getUnreadCountoFGroups(String id) {
+    String currentUserId = user.uid;
+
+    DocumentReference<Map<String, dynamic>> metadataRef =
+        firestore.collection('groups').doc(id);
+
+    // Access the specific unread count for the current user
+    String unreadCountField = 'user${currentUserId}UnreadCount';
+
+    return metadataRef.snapshots().map((snapshot) {
+      if (snapshot.exists) {
+        // Ensure data exists before accessing fields
+        return snapshot.data()?[unreadCountField] ??
+            0; // Use null-safety operators
+      } else {
+        // Handle the case where the document doesn't exist
+        // (e.g., return default value or error)
+        return 0; // Or handle differently based on your logic
+      }
+    });
+  }
+
   static Future<void> setUnreadCount({
     required String chatUserId,
+    required String groupId,
   }) async {
-    DocumentReference<Map<String, dynamic>> metadataRef =
-        firestore.collection("chats").doc(getConversationID(chatUserId));
-    String unreadCountField = 'user${chatUserId}UnreadCount';
+    if (chatUserId.isNotEmpty) {
+      DocumentReference<Map<String, dynamic>> metadataUserRef =
+          firestore.collection("chats").doc(getConversationID(chatUserId));
+      String unreadCountField = 'user${chatUserId}UnreadCount';
 
-    try {
-      DocumentSnapshot<Map<String, dynamic>> snapshot = await metadataRef.get();
+      try {
+        DocumentSnapshot<Map<String, dynamic>> snapshot =
+            await metadataUserRef.get();
 
-      if (snapshot.exists) {
-        await metadataRef.update({unreadCountField: FieldValue.increment(1)});
-      } else {
-        await metadataRef.set({unreadCountField: 1});
+        if (snapshot.exists) {
+          await metadataUserRef
+              .update({unreadCountField: FieldValue.increment(1)});
+        } else {
+          await metadataUserRef.set({unreadCountField: 1});
+        }
+      } catch (error) {
+        print('Error setting unread count: $error');
+        // Handle the error accordingly
       }
-    } catch (error) {
-      print('Error setting unread count: $error');
-      // Handle the error accordingly
+    }
+
+    if (groupId.isNotEmpty) {
+      DocumentReference<Map<String, dynamic>> metadataRef =
+          firestore.collection("groups").doc(groupId);
+
+      try {
+        DocumentSnapshot<Map<String, dynamic>> snapshot =
+            await metadataRef.get();
+        var groupMembersId = await snapshot.get("membersId");
+
+        for (var memberId in groupMembersId) {
+          String unreadCountField = 'user${memberId}UnreadCount';
+          if (snapshot.exists) {
+            await metadataRef
+                .update({unreadCountField: FieldValue.increment(1)});
+          } else {
+            await metadataRef.set({unreadCountField: 1});
+          }
+        }
+      } catch (error) {
+        print('Error setting unread count: $error');
+        // Handle the error accordingly
+      }
     }
   }
 
@@ -300,6 +356,7 @@ class ChatService {
     String groupId,
     List<ChatUser> selectedMembersChatUser,
   ) async {
+    var c = Get.put(ContactScreenController());
     var currentMembers = await getMemberIds(groupId);
 
     DocumentReference groupRef = firestore.collection('groups').doc(groupId);
@@ -312,11 +369,16 @@ class ChatService {
     var existingMembers = selectedMembers
         .where((member) => currentMembers.contains(member))
         .toList();
+    List<String> listOfName = [];
+    c.foundedUsers.forEach((element) {
+      if (existingMembers.contains(element.id)) {
+        listOfName.addIf(!(listOfName.contains(element.name)), element.name!);
+      }
+    });
 
     if (existingMembers.isNotEmpty) {
-      // Show a toast message indicating members already in the group
       Fluttertoast.showToast(
-          msg: '${existingMembers.join(', ')} already in the group');
+          msg: '${listOfName.join(', ')} already in the group');
       return;
     }
 
@@ -753,27 +815,53 @@ class ChatService {
     }
   }
 
-  static Future<void> clearChat(String chatId, BuildContext context) async {
-    loadingCircleProgressIndicator(context);
+  static Future<void> clearChat(
+      String chatId, String groupId, BuildContext context) async {
+    if (chatId.isNotEmpty) {
+      loadingCircleProgressIndicator(context);
 
-    FirebaseFirestore.instance
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .get()
-        .then((querySnapshot) {
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-      for (var doc in querySnapshot.docs) {
-        batch.update(doc.reference, {'isDeleted${ChatService.user.uid}': true});
-      }
-      return batch.commit();
-    }).then((_) {
-      Get.back();
-      Get.back();
-    }).catchError((error) {
-      print("Error clearing chat: $error");
-      Get.back();
-    });
+      FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .get()
+          .then((querySnapshot) {
+        WriteBatch batch = FirebaseFirestore.instance.batch();
+        for (var doc in querySnapshot.docs) {
+          batch.update(
+              doc.reference, {'isDeleted${ChatService.user.uid}': true});
+        }
+        return batch.commit();
+      }).then((_) {
+        Get.back();
+        Get.back();
+      }).catchError((error) {
+        print("Error clearing chat: $error");
+        Get.back();
+      });
+    } else {
+      loadingCircleProgressIndicator(context);
+
+      FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupId)
+          .collection('messages')
+          .get()
+          .then((querySnapshot) {
+        WriteBatch batch = FirebaseFirestore.instance.batch();
+        for (var doc in querySnapshot.docs) {
+          batch.update(
+              doc.reference, {'isDeleted${ChatService.user.uid}': true});
+        }
+        return batch.commit();
+      }).then((_) {
+        Get.back();
+        Get.back();
+      }).catchError((error) {
+        print("Error clearing chat: $error");
+        Get.back();
+      });
+    }
   }
 
   static Future<dynamic> loadingCircleProgressIndicator(BuildContext context) {

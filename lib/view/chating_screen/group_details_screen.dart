@@ -59,7 +59,8 @@ class GroupDetailsScreen extends StatelessWidget {
                         color: kWhite,
                       ),
                       ChatPopupMenu(
-                        chatId: groupChatInfo.groupId,
+                        chatId: '',
+                        groupId: groupChatInfo.groupId,
                       ),
                     ],
                   ),

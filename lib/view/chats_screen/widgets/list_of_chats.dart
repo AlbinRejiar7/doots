@@ -245,13 +245,29 @@ class ListOfChats extends StatelessWidget {
                                                 if (snapshot.data != null) {
                                                   final messageData =
                                                       snapshot.data!.docs;
-
-                                                  final list = messageData
-                                                      .map((e) =>
-                                                          Message.fromJson(
-                                                              e.data()))
-                                                      .toList();
-
+                                                  final list =
+                                                      messageData.map((e) {
+                                                    final Map<String, dynamic>
+                                                        data = e.data();
+                                                    final Message message =
+                                                        Message.fromJson(data);
+                                                    // Check if the field exists
+                                                    if (data.containsKey(
+                                                        "isDeleted${ChatService.user.uid}")) {
+                                                      // Set isDeleted based on the field value
+                                                      message.isDeleted = data[
+                                                          "isDeleted${ChatService.user.uid}"];
+                                                    } else {
+                                                      // If the field doesn't exist, set isDeleted to false
+                                                      message.isDeleted = false;
+                                                    }
+                                                    return message;
+                                                  }).toList();
+                                                  if (list[0].isDeleted ??
+                                                      false) {
+                                                    return Text(
+                                                        "all chats cleared");
+                                                  }
                                                   if (list.isNotEmpty) {
                                                     chatsCtr.foundedChatItem[
                                                             index] =
@@ -434,6 +450,23 @@ class ListOfChatsTrailing extends StatelessWidget {
           StreamBuilder(
             stream: ChatService.getUnreadCount(chatItems.id),
             builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+
+              if (snapshot.hasData && snapshot.data! != 0) {
+                int unreadCount = snapshot.data!;
+                return UnReadCountWidget(
+                    height: height, unreadCount: unreadCount);
+              }
+
+              return const SizedBox.shrink();
+            },
+          )
+        else
+          StreamBuilder(
+            stream: ChatService.getUnreadCountoFGroups(chatItems.id),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               }

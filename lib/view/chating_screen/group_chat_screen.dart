@@ -172,6 +172,10 @@ class GroupChatScreen extends StatelessWidget {
                           reverse: true,
                           itemCount: c.chats.length,
                           itemBuilder: (BuildContext context, int index) {
+                            var message = c.chats[index];
+                            if (message.isDeleted ?? false) {
+                              return const SizedBox.shrink();
+                            }
                             if (c.chats[index].messageType == 'text') {
                               return SwipeTo(
                                 onLeftSwipe: (details) {

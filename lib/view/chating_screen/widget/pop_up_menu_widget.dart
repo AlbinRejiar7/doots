@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ChatPopupMenu extends StatelessWidget {
-  final String? chatId;
-  const ChatPopupMenu({super.key, this.chatId});
+  final String chatId;
+  final String groupId;
+  const ChatPopupMenu({super.key, required this.chatId, required this.groupId});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class ChatPopupMenu extends StatelessWidget {
                   context: context,
                   onPressedTick: () {
                     if (chatId != null) {
-                      ChatService.clearChat(chatId!, context);
+                      ChatService.clearChat(chatId!, groupId!, context);
                     } else {
                       Fluttertoast.showToast(msg: "chatiD is null");
                     }

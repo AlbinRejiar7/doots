@@ -184,17 +184,6 @@ class ChattingScreen extends StatelessWidget {
                       );
                     }
 
-                    // if (snapshot.data != null) {
-                    //   final messageData = snapshot.data!.docs;
-                    //   c.chats = messageData.map((e) {
-                    //     return Message.fromJson(e.data());
-                    //   }).toList();
-                    //   c.isDeleted = messageData
-                    //       .map((e) =>
-                    //           e.data()["isDeleted${ChatService.user.uid}"]
-                    //               as bool)
-                    //       .toList();
-                    // }
                     if (snapshot.data != null) {
                       final messageData = snapshot.data!.docs;
                       c.chats = messageData.map((e) {
